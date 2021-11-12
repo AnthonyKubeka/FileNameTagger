@@ -23,8 +23,37 @@
                 <MenuItem Header="_Save Tag"/>
             </MenuItem>
         </Menu>
-        <Grid>
-            <ContentControl Content="{Binding TagViewModel}"/>
+        <Grid x:Name ="ChildViews">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Loaded Files" 
+                               Background="Black" 
+                               Foreground="White"
+                               Height="Auto"
+                               Width="Auto">
+                </TextBlock>
+                <ContentControl Content="{Binding FilesViewModel}"/>
+
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Tags" 
+                               Background="Black" 
+                               Foreground="White"
+                               Height="Auto"
+                               Width="Auto">
+                </TextBlock>
+                <ContentControl Content="{Binding TagsViewModel}"/>
+                <Button Content="Tags"
+                    Command="{Binding NavCommand}"
+                    CommandParameter="tags" />
+            </StackPanel>
         </Grid>
     </StackPanel>
 

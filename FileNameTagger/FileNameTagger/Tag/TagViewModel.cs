@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace FileNameTagger.Tag
 {
-    public class TagViewModel : INotifyPropertyChanged
+    public class TagViewModel : BindableBase
     {
         public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
         private ObservableCollection<Studio> studios;
@@ -17,6 +17,7 @@ namespace FileNameTagger.Tag
         private Category selectedCategory;
         private ResolutionsEnum selectedResolution;
 
+        public RelayCommand DeleteCommand { get; private set; }
         public ObservableCollection<Studio> Studios
         {
             get
@@ -87,7 +88,57 @@ namespace FileNameTagger.Tag
 
         public TagViewModel()
         {
+            this.LoadActors();
+            this.LoadStudios();
+            this.LoadCategories();
+            this.LoadResolutions();
 
         }
+
+        public void LoadResolutions()
+        {
+            Resolutions = new ObservableCollection<ResolutionsEnum>();
+
+            this.Resolutions.Add(ResolutionsEnum.SD);
+            this.Resolutions.Add(ResolutionsEnum.HD);
+            this.Resolutions.Add(ResolutionsEnum.FHD);
+            this.Resolutions.Add(ResolutionsEnum.QHD);
+            this.Resolutions.Add(ResolutionsEnum.UHD);
+        }
+
+        public void LoadCategories()
+        {
+            if (DesignerProperties.GetIsInDesignMode(
+               new System.Windows.DependencyObject())) return;
+
+            Categories = new ObservableCollection<Category>();
+
+            this.Categories.Add(new Category("action"));
+            this.Categories.Add(new Category("adventure"));
+            this.Categories.Add(new Category("superhero"));
+        }
+
+        public void LoadActors()
+        {
+            if (DesignerProperties.GetIsInDesignMode(
+               new System.Windows.DependencyObject())) return;
+
+            Actors = new ObservableCollection<Actor>();
+
+            this.Actors.Add(new Actor("Jennifer Lawrence", GendersEnum.Female));
+            this.Actors.Add(new Actor("Robert Downey Jr.", GendersEnum.Male));
+        }
+
+        public void LoadStudios()
+        {
+            if (DesignerProperties.GetIsInDesignMode(
+               new System.Windows.DependencyObject())) return;
+
+            Studios = new ObservableCollection<Studio>();
+
+            this.Studios.Add(new Studio("Warner Bros."));
+            this.Studios.Add(new Studio("Marvel Studios"));
+        }
+
     }
 }

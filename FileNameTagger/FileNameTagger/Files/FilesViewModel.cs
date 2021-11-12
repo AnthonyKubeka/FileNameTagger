@@ -7,9 +7,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 namespace FileNameTagger.Files
 {
-    public class FilesViewModel : INotifyPropertyChanged
+    public class FilesViewModel : BindableBase
     {
         private File selectedFile;
         private ObservableCollection<File> files;
@@ -67,5 +68,6 @@ namespace FileNameTagger.Files
         {
             return SelectedFile != null;
         }
+
     }
 }
