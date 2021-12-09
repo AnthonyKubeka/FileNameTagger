@@ -7,16 +7,10 @@ namespace FileNameTagger.Tag
 {
     public class TagViewModel : BindableBase
     {
-        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
         private ObservableCollection<Studio> studios;
         private ObservableCollection<Actor> actors;
         private ObservableCollection<ResolutionsEnum> resolutions;
         private ObservableCollection<Category> categories;
-        private Studio selectedStudio;
-        private Actor selectedActor;
-        private Category selectedCategory;
-        private ResolutionsEnum selectedResolution;
-
         public RelayCommand DeleteCommand { get; private set; }
         public ObservableCollection<Studio> Studios
         {
@@ -27,11 +21,7 @@ namespace FileNameTagger.Tag
 
             set
             {
-                if (studios != value)
-                {
-                    studios = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Studios"));
-                }
+                SetProperty(ref studios, value);
             }
         }
 
@@ -44,11 +34,7 @@ namespace FileNameTagger.Tag
 
             set
             {
-                if (actors != value)
-                {
-                    actors = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Actors"));
-                }
+                SetProperty(ref actors, value);
             }
         }
 
@@ -61,11 +47,7 @@ namespace FileNameTagger.Tag
 
             set
             {
-                if (categories != value)
-                {
-                    categories = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Categories"));
-                }
+                SetProperty(ref categories, value);
             }
         }
 
@@ -78,11 +60,7 @@ namespace FileNameTagger.Tag
 
             set
             {
-                if (resolutions != value)
-                {
-                    resolutions = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Resolutions"));
-                }
+                SetProperty(ref resolutions, value);
             }
         }
 

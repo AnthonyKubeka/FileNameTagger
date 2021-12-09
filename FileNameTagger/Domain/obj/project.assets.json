@@ -2,9 +2,15 @@
   "version": 3,
   "targets": {
     "net5.0": {
+      "MvvmLight/5.4.1.1": {
+        "type": "package"
+      },
       "Shared/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
+        "dependencies": {
+          "MvvmLight": "5.4.1.1"
+        },
         "compile": {
           "bin/placeholder/Shared.dll": {}
         },
@@ -15,6 +21,21 @@
     }
   },
   "libraries": {
+    "MvvmLight/5.4.1.1": {
+      "sha512": "fTUDMWT//ChZGd7Q5k0IaJuIXgh+FM43pCStxup7kgh1MQXvC48CjpjWkp5Auru/YXhHOJOMgD1NdtFZgn6K2g==",
+      "type": "package",
+      "path": "mvvmlight/5.4.1.1",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Content/ViewModel/MainViewModel.cs.pp",
+        "Content/ViewModel/ViewModelLocator.cs.pp",
+        "mvvmlight.5.4.1.1.nupkg.sha512",
+        "mvvmlight.nuspec",
+        "tools/install.ps1"
+      ]
+    },
     "Shared/1.0.0": {
       "type": "project",
       "path": "../Shared/Shared.csproj",
@@ -23,6 +44,7 @@
   },
   "projectFileDependencyGroups": {
     "net5.0": [
+      "MvvmLight >= 5.4.1.1",
       "Shared >= 1.0.0"
     ]
   },
@@ -68,6 +90,12 @@
     "frameworks": {
       "net5.0": {
         "targetAlias": "net5.0",
+        "dependencies": {
+          "MvvmLight": {
+            "target": "Package",
+            "version": "[5.4.1.1, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

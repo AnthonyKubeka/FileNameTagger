@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "E8HqEfJS1QQVlALxSJWtv9CTJqfmBOSCfyzQOMZBVeDWwkLQmlVTbY43wO6v+pi8sunMP4rIyg2K0QDHONuuzQ==",
+  "dgSpecHash": "0E9PflA9WSj75IsURnySWYI1yWdsQxQdJiau6cz1QRTE7VgkFwoMGlG+CSt9i7iuBBzWV2qWBRqS9E1XkODFng==",
   "success": true,
   "projectFilePath": "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\Domain\\Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlight\\5.4.1.1\\mvvmlight.5.4.1.1.nupkg.sha512"
+  ],
   "logs": []
 }

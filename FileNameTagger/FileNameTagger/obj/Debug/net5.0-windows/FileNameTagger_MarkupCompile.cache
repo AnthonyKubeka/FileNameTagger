@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET5_0;NETCOREAPP
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\App.xaml
-2145228431
+31214051376
 
-61114442050
-193-1891726104
-MainWindow.xaml;Tag\TagView.xaml;
+81900279793
+199-378888528
+Files\FilesView.xaml;MainWindow.xaml;Tag\TagView.xaml;
 
-False
+True
 

@@ -18,7 +18,9 @@
     <StackPanel>
         <Menu>
             <MenuItem Header="_File">
-                <MenuItem Header="_Load File"/>
+                <MenuItem Header="_Load File"
+                          Command ="{Binding AddFileToFilesViewCommand}">
+                </MenuItem>
                 <MenuItem Header="_New Tag"/>
                 <MenuItem Header="_Save Tag"/>
             </MenuItem>

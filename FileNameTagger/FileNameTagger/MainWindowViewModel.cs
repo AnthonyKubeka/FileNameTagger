@@ -1,4 +1,5 @@
-﻿using FileNameTagger.Files;
+﻿using Domain;
+using FileNameTagger.Files;
 using FileNameTagger.Tag;
 using Shared;
 using System;
@@ -35,11 +36,13 @@ namespace FileNameTagger
         public MainWindowViewModel()
         {
             NavCommand = new RelayCommand<string>(OnNav);
+            AddFileToFilesViewCommand = new RelayCommand(OnAddFilesToFilesView);
         }
 
         public RelayCommand<string> NavCommand { get; private set; }
+        public RelayCommand AddFileToFilesViewCommand { get; private set; }
 
-        private void OnNav(string destination)
+    private void OnNav(string destination)
         {
             switch (destination)
             {
@@ -53,23 +56,29 @@ namespace FileNameTagger
             }
         }
 
-        public void OpenFileExplorer()
+        public string SelectFileFromFileExplorer()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = "Document"; // Default file name
-            dialog.DefaultExt = ".txt"; // Default file extension
-            dialog.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+            dialog.FileName = ""; 
+            dialog.DefaultExt = ".mp4";
 
-            // Show open file dialog box
             bool? result = dialog.ShowDialog();
 
-            // Process open file dialog box results
             if (result == true)
             {
-                // Open document
                 string filename = dialog.FileName;
+                return filename;
+            }
+            else
+            {
+                return "File not found";
             }
 
+        }
+
+        void OnAddFilesToFilesView()
+        {
+            var fileToAdd = this.SelectFileFromFileExplorer();
         }
     }
 }

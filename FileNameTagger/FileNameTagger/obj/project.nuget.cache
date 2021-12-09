@@ -1,8 +1,22 @@
 {
   "version": 2,
-  "dgSpecHash": "N1/l4/cqvxSnJFj/u14rT95XG9Gw92N1M8LZjsPhEMNebkLxxG/xofdmple4ot34hDN5gKJaA260GMMy4/mq1Q==",
+  "dgSpecHash": "o3uzSTUmEyqLKgAu7O5BD1wawss8cJ0zYo6vrqWMPO7ZsKWWO+qdnL/WzRC2mA+XZLdyHAVDqzuWuCaslt27aA==",
   "success": true,
   "projectFilePath": "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\FileNameTagger\\FileNameTagger.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlight\\5.4.1.1\\mvvmlight.5.4.1.1.nupkg.sha512",
+    "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlightlibs\\5.4.1.1\\mvvmlightlibs.5.4.1.1.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'MvvmLightLibs 5.4.1.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8' instead of the project target framework 'net5.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "MvvmLightLibs",
+      "targetGraphs": [
+        "net5.0-windows7.0"
+      ]
+    }
+  ]
 }
