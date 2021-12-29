@@ -197,7 +197,8 @@
     "net5.0-windows7.0": [
       "Domain >= 1.0.0",
       "MvvmLight >= 5.4.1.1",
-      "MvvmLightLibs >= 5.4.1.1"
+      "MvvmLightLibs >= 5.4.1.1",
+      "Shared >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -229,6 +230,9 @@
           "projectReferences": {
             "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\Domain\\Domain.csproj": {
               "projectPath": "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\Domain\\Domain.csproj"
+            },
+            "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\Shared\\Shared.csproj"
             }
           }
         }
@@ -262,6 +266,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[5.0.13, 5.0.13]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
@@ -270,7 +280,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   },

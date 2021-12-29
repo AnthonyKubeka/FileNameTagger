@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "o3uzSTUmEyqLKgAu7O5BD1wawss8cJ0zYo6vrqWMPO7ZsKWWO+qdnL/WzRC2mA+XZLdyHAVDqzuWuCaslt27aA==",
+  "dgSpecHash": "gVRcVlcSIaRuAWuzzrk5T7HzPukJVeHjGRNkBmao64QWFBxBorGFWcLdmAxyYtTLcu9987gdMT0ef4aMFBAjqA==",
   "success": true,
   "projectFilePath": "C:\\MyProgrammingProjects(SSD)\\FileNameTagger\\FileNameTagger\\FileNameTagger\\FileNameTagger.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlight\\5.4.1.1\\mvvmlight.5.4.1.1.nupkg.sha512",
-    "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlightlibs\\5.4.1.1\\mvvmlightlibs.5.4.1.1.nupkg.sha512"
+    "C:\\Users\\nmkub\\.nuget\\packages\\mvvmlightlibs\\5.4.1.1\\mvvmlightlibs.5.4.1.1.nupkg.sha512",
+    "C:\\Users\\nmkub\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\5.0.13\\microsoft.netcore.app.host.win-x64.5.0.13.nupkg.sha512"
   ],
   "logs": [
     {

@@ -1,30 +1,36 @@
-﻿using Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Collections.Generic;
+using Shared;
 namespace Domain
 {
     public class Tag
     {
-        public Tag(IEnumerable<Actor> actors, IEnumerable<Category> categories, Studio studio, string title, ResolutionsEnum resolution)
-        {
-            Actors = actors;
-            Categories = categories;
-            Studio = studio;
-            Title = title;
-            Resolution = resolution;
-        }
 
-        public string ExportedTagName { get; set; }
+        public string ExportedsTagName { get; set; }
 
         public IEnumerable<Actor> Actors { get; set; }
         public IEnumerable<Category> Categories { get; set; }
-        public Studio Studio { get; set; }
+        public IEnumerable<Studio> Studios { get; set; }
         public string Title { get; set; }
         public ResolutionsEnum Resolution { get; set; }
+
+        public File File;
+
+
+        public Tag(IEnumerable<Actor> actors, IEnumerable<Category> categories, IEnumerable<Studio> studios, string title, ResolutionsEnum resolution, File file)
+        {
+            Actors = actors;
+            Categories = categories;
+            Studios = studios;
+            Title = title;
+            Resolution = resolution;
+            File = file; 
+        }
+
+        public Tag(File file)
+        {
+            File = file; 
+        }
+
 
 
     }

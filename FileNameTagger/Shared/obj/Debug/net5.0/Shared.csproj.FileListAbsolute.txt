@@ -2,7 +2,7 @@ C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\bin\Debug\net
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\bin\Debug\net5.0\Shared.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\bin\Debug\net5.0\ref\Shared.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\bin\Debug\net5.0\Shared.pdb
-C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\obj\Debug\net5.0\Shared.csproj.AssemblyReference.cache
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\obj\Debug\net5.0\Shared.csproj.ResolveComReference.cache
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\obj\Debug\net5.0\Shared.GeneratedMSBuildEditorConfig.editorconfig
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\obj\Debug\net5.0\Shared.AssemblyInfoInputs.cache
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Shared\obj\Debug\net5.0\Shared.AssemblyInfo.cs

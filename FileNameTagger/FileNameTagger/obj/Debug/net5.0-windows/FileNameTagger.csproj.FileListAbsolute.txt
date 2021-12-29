@@ -20,12 +20,12 @@ C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\D
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\ref\FileNameTagger.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\FileNameTagger.pdb
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\FileNameTagger.genruntimeconfig.cache
-C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\Tag\TagView.g.cs
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\GeneratedInternalTypeHelper.g.cs
-C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\Tag\TagView.baml
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\Domain.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\Shared.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\Domain.pdb
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\Shared.pdb
-C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\Files\FilesView.g.cs
-C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\Files\FilesView.baml
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\GalaSoft.MvvmLight.Extras.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\GalaSoft.MvvmLight.Platform.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\GalaSoft.MvvmLight.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\System.Windows.Interactivity.dll
