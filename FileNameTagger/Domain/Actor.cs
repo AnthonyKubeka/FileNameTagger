@@ -10,6 +10,13 @@ namespace Domain
     {
         public string Name { get; set; }
         public GendersEnum Gender { get; set; }
+        public bool IsChecked { get; set; }
+
+        public Actor(string name)
+        {
+            Name = name;
+            IsChecked = false;
+        }
 
         public Actor(string name, GendersEnum gender)
         {

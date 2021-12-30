@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
-        <DataTemplate x:Key="FilesDataTemplate">
+        <DataTemplate x:Key="StaticCheckboxDataTemplate">
             <Border Name="border" BorderBrush="DarkSlateBlue" BorderThickness="2"
                 CornerRadius="2" Padding="5" Margin="5">
                 <Grid>
@@ -20,45 +20,15 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Padding="0,0,5,0" Text="File Name:"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
+                    <CheckBox IsChecked="{Binding Path=IsChecked}">
+                        <WrapPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
+                        </WrapPanel>
+                    </CheckBox>
                 </Grid>
             </Border>
         </DataTemplate>
-
-        <DataTemplate x:Key="DefaultStudiosDataTemplate">
-            <Border Name="border" BorderBrush="DarkSlateBlue" BorderThickness="2"
-                CornerRadius="2" Padding="5" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Padding="0,0,5,0" Text="Studio:"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
-                </Grid>
-            </Border>
-        </DataTemplate>
-        <DataTemplate x:Key="DefaultActorsDataTemplate">
-            <Border Name="border" BorderBrush="DarkSlateBlue" BorderThickness="2"
-                CornerRadius="2" Padding="5" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Padding="0,0,5,0" Text="Name:"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
-                </Grid>
-            </Border>
-        </DataTemplate>
-        <!--For binding the enum-->
+        <!--For data binding the enum-->
         <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
                         ObjectType="{x:Type system:Enum}">
             <ObjectDataProvider.MethodParameters>
@@ -74,10 +44,11 @@
         <Menu>
             <MenuItem Header="_File">
                 <MenuItem Header="_Load File"
-                          Command ="{Binding AddFileToFilesViewCommand}">
+                          Command ="{Binding AddFileCommand}">
                 </MenuItem>
                 <MenuItem Header="_New Tag"/>
-                <MenuItem Header="_Save Tag"/>
+                <MenuItem Header="_Save Tag"
+                          Command="{Binding SaveTagCommand}"/>
             </MenuItem>
         </Menu>
         <Grid x:Name ="ChildViews">
@@ -87,34 +58,21 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Loaded Files" 
-                               Background="Black" 
-                               Foreground="White"
-                               Height="Auto"
-                               Width="Auto">
-                </TextBlock>
-                <ListBox 
-                        ItemsSource="{Binding Files}"
-                        ItemTemplate ="{StaticResource FilesDataTemplate}"
-                        IsSynchronizedWithCurrentItem="True"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1">
-                <TextBlock Text="Tags" 
+                <TextBlock Text="Tag" 
                                Background="Black" 
                                Foreground="White"
                                Height="Auto"
                                Width="Auto">
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                    <TextBlock>Selected File: </TextBlock>
-                    <TextBlock Text="{Binding SelectedFileName}"/>
+                    <TextBlock>Selected File: </TextBlock> 
+                    <TextBlock Text="{Binding LoadedFile.Name}"/>
                 </StackPanel>
                 <Expander Header="Studio">
                     <ListBox ItemsSource="{Binding Studios}"
-                             ItemTemplate="{StaticResource DefaultStudiosDataTemplate}"
+                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
                 </Expander>
                 <Grid x:Name="TitleBox">
@@ -123,22 +81,31 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0">Title: </TextBlock>
-                    <TextBox Grid.Column ="1"/>
+                    <TextBox Grid.Column ="1" Margin="5" Padding="5"/>
                 </Grid>
-                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150"
+                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150" SelectedItem="{Binding SelectedResolution}"
                           ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
                 <Expander Header="Actors">
                     <ListBox ItemsSource="{Binding Actors}"
-                             ItemTemplate="{StaticResource DefaultActorsDataTemplate}"
+                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
                 </Expander>
                 <Expander Header="Categories">
                     <ListBox ItemsSource="{Binding Categories}"
-                             ItemTemplate="{StaticResource DefaultActorsDataTemplate}"
+                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
                 </Expander>
+                <Label>Release Date:</Label>
+                <DatePicker SelectedDate="{Binding ReleaseDate}"></DatePicker>
+                <Grid x:Name="ExportedTag">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
+                    <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
+                </Grid>
             </StackPanel>
-            
         </Grid>
     </StackPanel>
 

@@ -29,3 +29,4 @@ C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\D
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\GalaSoft.MvvmLight.Platform.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\GalaSoft.MvvmLight.dll
 C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\bin\Debug\net5.0-windows\System.Windows.Interactivity.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\FileNameTagger\obj\Debug\net5.0-windows\FileNameTagger.csproj.CopyComplete

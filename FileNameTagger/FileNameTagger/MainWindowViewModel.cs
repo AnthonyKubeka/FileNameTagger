@@ -1,59 +1,132 @@
 ﻿using Domain;
 using Shared;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-
+using System.Linq; 
 
 namespace FileNameTagger
 {
-    public class MainWindowViewModel : BindableBase
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
 
-        private ObservableCollection<File> files;
-        private File selectedFile; 
+        private File loadedFile;
+        private string loadedFileName;
+        private string title;
+        private string exportedTag; 
         private ObservableCollection<Studio> studios;
         private ObservableCollection<Actor> actors;
-        private ObservableCollection<ResolutionsEnum> resolutions;
+        private ResolutionsEnum selectedResolution; 
         private ObservableCollection<Category> categories;
-        private ObservableCollection<Tag> tags;
+        private Tag tag;
+        private DateTime releaseDate; 
+        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
 
-        public string SelectedFileName
+        public DateTime ReleaseDate
         {
             get
             {
-                if (SelectedFile != null)
+                return releaseDate;
+            }
+
+            set
+            {
+                if (releaseDate != value)
                 {
-                    return SelectedFile.Name;
+                    releaseDate = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                }
+            }
+        }
+
+        public string ExportedTag
+        {
+            get
+            {
+                return exportedTag;
+            }
+
+            set
+            {
+                if (exportedTag != value)
+                {
+                    exportedTag = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                }
+            }
+        }
+
+        public string Title
+        {
+            get
+            {
+                return title;
+            }
+
+            set
+            {
+                if (title != value)
+                {
+                    title = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("Title"));
+                }
+            }
+        }
+
+        public string LoadedFileName
+        {
+            get
+            {
+                if (loadedFile != null)
+                {
+                    return loadedFile.Name;
                 }
                 else
                 {
                     return "No File Selected";
                 }
             }
+
+            set
+            {
+                if (loadedFileName != value)
+                {
+                    loadedFileName = value; 
+                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFileName"));
+                }
+            }
         }
-        public File SelectedFile
+        public File LoadedFile
         {
             get
             {
-                return selectedFile;
+                return loadedFile;
             }
 
             set
             {
-                SetProperty(ref selectedFile, value);
+                if (loadedFile != value)
+                {
+                    loadedFile = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFile"));
+                }
             }
         }
 
-        public ObservableCollection<Tag> Tags
+        public Tag Tag
         {
             get
             {
-                return tags;
+                return tag;
             }
 
             set
             {
-                SetProperty(ref tags, value);
+                if (tag != value)
+                {
+                    tag = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("Tag"));
+                }
             }
         }
         public ObservableCollection<Studio> Studios
@@ -65,7 +138,11 @@ namespace FileNameTagger
 
             set
             {
-                SetProperty(ref studios, value);
+                if (studios != value)
+                {
+                    studios = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("Studios"));
+                }
             }
         }
 
@@ -78,7 +155,11 @@ namespace FileNameTagger
 
             set
             {
-                SetProperty(ref actors, value);
+                if (actors != value)
+                {
+                    actors = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("Actors"));
+                }
             }
         }
 
@@ -91,79 +172,47 @@ namespace FileNameTagger
 
             set
             {
-                SetProperty(ref categories, value);
+                if (categories != value)
+                {
+                    categories = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("Categories"));
+                }
             }
         }
 
-        public ObservableCollection<ResolutionsEnum> Resolutions
+        public ResolutionsEnum SelectedResolution
         {
             get
             {
-                return resolutions;
+                return selectedResolution;
             }
 
             set
             {
-                SetProperty(ref resolutions, value);
+                if (selectedResolution != value)
+                {
+                    selectedResolution = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedResolution"));
+                }
             }
-        }
-        public ObservableCollection<File> Files
-        {
-            //fire the event when the properties change
-            get
-            {
-                return files;
-            }
-
-            set
-            {
-                SetProperty(ref files, value);
-            }
-        }
-        private BindableBase currentViewModel;
-        public BindableBase CurrentViewModel
-        {
-            get { return currentViewModel; }
-            set { SetProperty(ref currentViewModel, value); }
         }
 
         public MainWindowViewModel()
         {
-            NavCommand = new RelayCommand<string>(OnNav);
-            AddFileToFilesViewCommand = new RelayCommand(OnAddFilesToFilesView);
-            DeleteFileCommand = new RelayCommand<File>(OnDeleteFile);
+            this.AddFileCommand = new RelayCommand(OnAddFile);
+            this.SaveTagCommand = new RelayCommand(OnSaveTag);
             this.LoadActors();
             this.LoadStudios();
             this.LoadCategories();
-            this.LoadResolutions();
-            this.files = new ObservableCollection<File>();
-            this.tags = new ObservableCollection<Tag>();
-
+            this.LoadedFile = new File("No File Selected");
+            this.Tag = new Tag(this.LoadedFile);
+            this.exportedTag = "No Tag Created For File";
         }
 
-        public RelayCommand<File> DeleteFileCommand { get; private set; } //private set as we only want this to be settable once, on construction
+        public RelayCommand<File> DeleteFileCommand { get; private set; } 
 
-        public RelayCommand<string> NavCommand { get; private set; }
-        public RelayCommand AddFileToFilesViewCommand { get; private set; }
-
-    private void OnNav(string destination)
-        {
-            switch (destination)
-            {
-                case "files":
-                    //CurrentViewModel = filesViewModel;
-                    break;
-                case "tags":
-                default: 
-                   // CurrentViewModel = tagViewModel;
-                    break;
-            }
-        }
-
-        private void OnDeleteFile(File fileToDelete)
-        {
-            Files.Remove(fileToDelete);
-        }
+        public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
+        public RelayCommand SaveTagCommand { get; private set; }
 
         public string SelectFileFromFileExplorer()
         {
@@ -176,6 +225,7 @@ namespace FileNameTagger
             if (result == true)
             {
                 string filename = dialog.FileName;
+                this.loadedFileName = "Hello Mojo"; 
                 return filename;
             }
             else
@@ -185,23 +235,19 @@ namespace FileNameTagger
 
         }
 
-        void OnAddFilesToFilesView()
+        void OnAddFile()
         {
             var fileToAdd = (new File (this.SelectFileFromFileExplorer()));
-            files.Add(fileToAdd);
-            tags.Add(new Tag(fileToAdd));
+            this.LoadedFile = fileToAdd; 
         }
 
-        public void LoadResolutions()
+        void OnSaveTag()
         {
-            Resolutions = new ObservableCollection<ResolutionsEnum>();
-
-            this.Resolutions.Add(ResolutionsEnum.SD);
-            this.Resolutions.Add(ResolutionsEnum.HD);
-            this.Resolutions.Add(ResolutionsEnum.FHD);
-            this.Resolutions.Add(ResolutionsEnum.QHD);
-            this.Resolutions.Add(ResolutionsEnum.UHD);
+            var tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate);
+            this.Tag = tagToSave;
+            this.ExportedTag = this.Tag.ExportTagName();
         }
+
 
         public void LoadCategories()
         {

@@ -9,10 +9,12 @@ namespace Domain
     public class Studio
     {
         public string Name { get; set; }
+        public bool IsChecked { get; set; }
 
         public Studio(string name)
         {
             Name = name;
+            IsChecked = false; 
         }
     }
 }
