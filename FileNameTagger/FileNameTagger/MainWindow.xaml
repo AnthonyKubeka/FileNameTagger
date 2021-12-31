@@ -96,7 +96,7 @@
                              IsSynchronizedWithCurrentItem="True"/>
                 </Expander>
                 <Label>Release Date:</Label>
-                <DatePicker SelectedDate="{Binding ReleaseDate}"></DatePicker>
+                <DatePicker SelectedDate="{Binding ReleaseDate}" ></DatePicker>
                 <Grid x:Name="ExportedTag">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
