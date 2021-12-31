@@ -201,9 +201,8 @@ namespace FileNameTagger
         {
             this.AddFileCommand = new RelayCommand(OnAddFile);
             this.SaveTagCommand = new RelayCommand(OnSaveTag);
-            this.LoadActors();
-            this.LoadStudios();
-            this.LoadCategories();
+            ReadDatabase();
+            ReleaseDate = DateTime.Now; 
             this.LoadedFile = new File("No File Selected");
             this.Tag = new Tag(this.LoadedFile);
             this.exportedTag = "No Tag Created For File";
@@ -213,6 +212,25 @@ namespace FileNameTagger
 
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
+
+        private void ReadDatabase()
+        {
+            using (SQLite.SQLiteConnection connection = new SQLite.SQLiteConnection(App.databasePath))
+            {
+                connection.CreateTable<Actor>();
+                connection.CreateTable<Studio>();
+                connection.CreateTable<Category>();
+
+                var actors = connection.Table<Actor>().ToList().OrderBy(actors => actors.Name).ToList();
+                var categories = connection.Table<Category>().ToList().OrderBy(categories => categories.Name).ToList();
+                var studios = connection.Table<Studio>().ToList().OrderBy(studios => studios.Name).ToList();
+
+                this.Actors = new ObservableCollection<Actor>(actors);
+                this.Categories = new ObservableCollection<Category>(categories);
+                this.Studios = new ObservableCollection<Studio>(studios);
+
+            }
+        }
 
         public string SelectFileFromFileExplorer()
         {
@@ -246,41 +264,6 @@ namespace FileNameTagger
             var tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate);
             this.Tag = tagToSave;
             this.ExportedTag = this.Tag.ExportTagName();
-        }
-
-
-        public void LoadCategories()
-        {
-            if (DesignerProperties.GetIsInDesignMode(
-               new System.Windows.DependencyObject())) return;
-
-            Categories = new ObservableCollection<Category>();
-
-            this.Categories.Add(new Category("action"));
-            this.Categories.Add(new Category("adventure"));
-            this.Categories.Add(new Category("superhero"));
-        }
-
-        public void LoadActors()
-        {
-            if (DesignerProperties.GetIsInDesignMode(
-               new System.Windows.DependencyObject())) return;
-
-            Actors = new ObservableCollection<Actor>();
-
-            this.Actors.Add(new Actor("Jennifer Lawrence", GendersEnum.Female));
-            this.Actors.Add(new Actor("Robert Downey Jr.", GendersEnum.Male));
-        }
-
-        public void LoadStudios()
-        {
-            if (DesignerProperties.GetIsInDesignMode(
-               new System.Windows.DependencyObject())) return;
-
-            Studios = new ObservableCollection<Studio>();
-
-            this.Studios.Add(new Studio("Warner Bros."));
-            this.Studios.Add(new Studio("Marvel Studios"));
         }
     }
 }
