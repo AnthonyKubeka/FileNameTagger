@@ -6,7 +6,7 @@ on:
     - "filenametagger/v*"
 
 env: 
-    PROJECT_PATH: FileNameTagger/FileNameTagger
+    PROJECT_PATH: FileNameTagger\FileNameTagger\FileNameTagger.csproj
 jobs:
  deploy:
   runs-on: windows-latest
