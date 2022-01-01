@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies><!--Remove when building copylocaletc.-->
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
