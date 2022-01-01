@@ -70,10 +70,12 @@
                     <TextBlock>Selected File: </TextBlock> 
                     <TextBlock Text="{Binding LoadedFile.Name}"/>
                 </StackPanel>
-                <Expander Header="Studio">
-                    <ListBox ItemsSource="{Binding Studios}"
+                <Expander Header="Studios/Websites">
+                    <ScrollViewer Height="150">
+                        <ListBox ItemsSource="{Binding Studios}"
                              ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
+                    </ScrollViewer>
                 </Expander>
                 <Grid x:Name="TitleBox">
                     <Grid.ColumnDefinitions>
@@ -86,14 +88,18 @@
                 <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150" SelectedItem="{Binding SelectedResolution}"
                           ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
                 <Expander Header="Actors">
-                    <ListBox ItemsSource="{Binding Actors}"
+                    <ScrollViewer Height="150">
+                        <ListBox ItemsSource="{Binding Actors}"
                              ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
+                    </ScrollViewer>
                 </Expander>
                 <Expander Header="Categories">
-                    <ListBox ItemsSource="{Binding Categories}"
+                    <ScrollViewer Height="150">
+                        <ListBox ItemsSource="{Binding Categories}"
                              ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
+                    </ScrollViewer>
                 </Expander>
                 <Label>Release Date:</Label>
                 <DatePicker SelectedDate="{Binding ReleaseDate}" ></DatePicker>
