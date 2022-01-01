@@ -1,0 +1,14 @@
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\Domain.deps.json
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\Domain.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\ref\Domain.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\Domain.pdb
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\Shared.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\bin\Debug\net6.0\Shared.pdb
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\ref\Domain.dll
+C:\MyProgrammingProjects(SSD)\FileNameTagger\FileNameTagger\Domain\obj\Debug\net6.0\Domain.pdb
