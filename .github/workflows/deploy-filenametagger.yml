@@ -6,7 +6,7 @@ on:
     - "filenametagger/v*"
 
 env: 
-    PROJECT_PATH: FileNameTagger/FileNameTagger.csproj
+    PROJECT_PATH: ../../FileNameTagger/FileNameTagger/FileNameTagger.csproj
 jobs:
  deploy:
   runs-on: windows-latest
@@ -20,4 +20,4 @@ jobs:
 
     - run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
 
-    - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true
+    - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
