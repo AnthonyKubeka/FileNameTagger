@@ -1,6 +1,7 @@
 name: "Deploy FileNameTagger"
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "filenametagger/v*"
