@@ -6,18 +6,19 @@ on:
     - "filenametagger/v*"
 
 env: 
-    PROJECT_PATH: FileNameTagger\FileNameTagger\FileNameTagger.csproj
+    PROJECT_PATH: FileNameTagger/FileNameTagger/FileNameTagger.csproj
 jobs:
  deploy:
   runs-on: windows-latest
   steps:
     - uses: actions/checkout@v2
+
     - uses: actions/setup-dotnet@v1
       with:
-          dotnet-version: 6.0.x
+          dotnet-version: 3.1.x
 
-    - run: dotnet restore ${{ env.PROJECT_PATH }}
+  - run: dotnet restore ${{ env.PROJECT_PATH }}
 
-    - run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore -p:PublishSingleFile=true
+      - run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
 
-    - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
+      - run: dotnet publish ${{ env.PROJECT_PATH }} -c Release --self-contained -r win-x64 -p:PublishSingleFile=true --no-build
