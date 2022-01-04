@@ -25,19 +25,5 @@ namespace Repository
             => options.UseSqlite($"Data Source={DbPath}");
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-           modelBuilder.Entity<Actor>(entity =>
-           {
-               entity.HasKey(e => e.ActorId);
-               entity.Property(e => e.Name); 
-
-               entity.HasData(new Actor //seed data
-               {
-                   ActorId = 1,
-                   Name = "Jennifer Lawrence"
-               })
-           })
-        }
     }
 }
