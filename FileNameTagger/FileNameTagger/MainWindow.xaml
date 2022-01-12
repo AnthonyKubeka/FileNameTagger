@@ -7,7 +7,13 @@
         xmlns:local="clr-namespace:FileNameTagger"
         xmlns:shared="clr-namespace:Shared;assembly=Shared"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Height="600" Width="920"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Background="Transparent"
+        AllowsTransparency="True"
+        >
+
     <Window.Resources>
         <DataTemplate x:Key="StaticCheckboxDataTemplate">
             <Border Name="border" BorderBrush="DarkSlateBlue" BorderThickness="2"
@@ -40,6 +46,10 @@
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
+
+    <Border Background="RoyalBlue"
+        CornerRadius="12">
+
     <StackPanel>
         <Menu>
             <MenuItem Header="_File">
@@ -60,12 +70,6 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Tag" 
-                               Background="Black" 
-                               Foreground="White"
-                               Height="Auto"
-                               Width="Auto">
-                </TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                     <TextBlock>Selected File: </TextBlock> 
                     <TextBlock Text="{Binding LoadedFile.Name}"/>
@@ -114,5 +118,5 @@
             </StackPanel>
         </Grid>
     </StackPanel>
-
+    </Border>
 </Window>
