@@ -9,9 +9,13 @@
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
-        ResizeMode="CanResize"
+        ResizeMode="CanResizeWithGrip"
         Background="Transparent"
         AllowsTransparency="True"
+        ShowInTaskbar="True"
+        WindowStartupLocation="CenterOwner"
+        WindowState="Normal"
+        SizeToContent="Manual"
         >
 
     <Window.Resources>
@@ -47,10 +51,8 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
 
-    <Border Background="RoyalBlue"
-        CornerRadius="12">
-
-    <StackPanel>
+    <Border Background="RoyalBlue">
+        <StackPanel>
             <Menu Margin="0,0,0,20">
                 <MenuItem Header="_File" Style="{StaticResource MenuButtonTheme}" >
                 <MenuItem Header="_Load File"
