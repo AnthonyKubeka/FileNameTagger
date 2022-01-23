@@ -6,6 +6,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:FileNameTagger"
         xmlns:shared="clr-namespace:Shared;assembly=Shared"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Height="600" Width="920"
         WindowStyle="None"
@@ -19,9 +20,7 @@
         >
 
     <Window.Resources>
-        <DataTemplate x:Key="StaticCheckboxDataTemplate">
-            <Border Name="border" BorderBrush="DarkSlateBlue" BorderThickness="2"
-                CornerRadius="2" Padding="5" Margin="5">
+        <DataTemplate x:Key="StaticDataItemDataTemplate">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -29,14 +28,51 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <CheckBox IsChecked="{Binding Path=IsChecked}">
                         <WrapPanel>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
-                        </WrapPanel>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
+                        <Button Grid.Column="2" 
+                                Command="{Binding DataContext.AddStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
+                                CommandParameter="{Binding}"
+                                HorizontalAlignment="Left"
+                                Padding="10,10,10,10"
+                                Margin="10,0,0,0"
+                                >
+                            <materialDesign:PackIcon
+                                        Kind="Plus"
+                                        Height="12"/>
+                        </Button>
+                        <Button Grid.Column="3" 
+                                Command="{Binding DataContext.UpdateStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
+                                CommandParameter="{Binding}"
+                                HorizontalAlignment="Left"
+                                Padding="10,10,10,10"
+                                Margin="5,0,0,0"
+                                >
+                            <materialDesign:PackIcon
+                                        Kind="ContentSave"
+                                        Height="12"
+                                        Padding="0,10,10,0"/>
+                        </Button>
+                        <Button Grid.Column="4" 
+                                Command="{Binding DataContext.DeleteStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
+                                CommandParameter="{Binding}"
+                                HorizontalAlignment="Left"
+                                Padding="10,10,10,10"
+                                Margin="5,0,0,0"
+                                >
+                            <materialDesign:PackIcon
+                                        Kind="TrashCanCircle"
+                                        Height="12"
+                                        Padding="0,10,10,0"/>
+                        </Button>
+                    </WrapPanel>
                     </CheckBox>
                 </Grid>
-            </Border>
         </DataTemplate>
         <!--For data binding the enum-->
         <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
@@ -73,39 +109,66 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                    <TextBlock>Selected File: </TextBlock> 
-                    <TextBlock Text="{Binding LoadedFile.Name}"/>
+                    <TextBlock FontSize="18" Margin="0,0,5,5">Selected File: </TextBlock> 
+                    <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
                 </StackPanel>
-                <Expander Header="Studios/Websites">
-                    <ScrollViewer Height="150">
-                        <ListBox ItemsSource="{Binding Studios}"
-                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
+                    <Grid x:Name="TitleBox">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0">Title:</TextBlock>
+                        <TextBox Grid.Column ="1" Margin="5" Padding="5"/>
+                    </Grid>
+                    <Grid x:Name="ResolutionBox">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Resolution:"
+                            />
+                        <ComboBox
+                            Grid.Column="2"
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" 
+                            MinWidth="150" 
+                            SelectedItem="{Binding SelectedResolution}"
+                            ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
+                    </Grid>
+
+                    <Expander Header="Studios">
+                        <StackPanel>
+                            <ListBox MaxHeight="150" x:Name="StaticDataListBox" ItemsSource="{Binding Studios}"
+                                         SelectedItem="{Binding SelectedStudio}"
+                             ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
-                    </ScrollViewer>
-                </Expander>
-                <Grid x:Name="TitleBox">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0">Title: </TextBlock>
-                    <TextBox Grid.Column ="1" Margin="5" Padding="5"/>
-                </Grid>
-                <ComboBox HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="150" SelectedItem="{Binding SelectedResolution}"
-                          ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
-                <Expander Header="Actors">
-                    <ScrollViewer Height="150">
-                        <ListBox ItemsSource="{Binding Actors}"
-                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
+                            <TextBox AcceptsReturn="False" Text="{Binding StudioToAdd, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding 
+                                    Key="Enter" 
+                                    Command="{Binding AddStudioCommand}" 
+                                    CommandParameter="{Binding Path=Text, RelativeSource={RelativeSource AncestorType={x:Type TextBox}}}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header="Actors">
+                        <ListBox 
+                             MaxHeight="150"
+                             ItemsSource="{Binding Actors}"
+                             ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
+                             SelectedItem="{Binding SelectedActor}"
                              IsSynchronizedWithCurrentItem="True"/>
-                    </ScrollViewer>
                 </Expander>
                 <Expander Header="Categories">
-                    <ScrollViewer Height="150">
-                        <ListBox ItemsSource="{Binding Categories}"
-                             ItemTemplate="{StaticResource StaticCheckboxDataTemplate}"
-                             IsSynchronizedWithCurrentItem="True"/>
-                    </ScrollViewer>
+                        <ListBox 
+                            MaxHeight="150"
+                            ItemsSource="{Binding Categories}"
+                            ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
+                            SelectedItem="{Binding SelectedCategory}"
+                            IsSynchronizedWithCurrentItem="True"/>
                 </Expander>
                 <Label>Release Date:</Label>
                 <DatePicker SelectedDate="{Binding ReleaseDate}" ></DatePicker>
