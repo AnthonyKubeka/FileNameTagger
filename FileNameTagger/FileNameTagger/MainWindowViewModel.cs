@@ -3,25 +3,51 @@ using Shared;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq; 
+using System.Linq;
+using SQLite.Net;
+
+using System.Windows.Controls;
+using System.Windows.Input;
+using SQLite;
+using Repository;
+using System.Collections.Generic;
 
 namespace FileNameTagger
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-
+        #region Properties
         private File loadedFile;
         private string loadedFileName;
         private string title;
-        private string exportedTag; 
+        private string exportedTag;
+        private Studio selectedStudio;
+        private Actor selectedActor;
+        private Category selectedCategory;
         private ObservableCollection<Studio> studios;
         private ObservableCollection<Actor> actors;
         private ResolutionsEnum selectedResolution; 
         private ObservableCollection<Category> categories;
         private Tag tag;
-        private DateTime releaseDate; 
+        private DateTime releaseDate;
+        #endregion
+
         public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
 
+        #region Commands
+        public RelayCommand<File> DeleteFileCommand { get; private set; }
+
+        public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
+        public RelayCommand SaveTagCommand { get; private set; }
+        public RelayCommand<object> AddStaticDataCommand { get; private set; }
+        public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
+        public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
+        public IRepositoryBase<Studio> studioRepository { get; set;  }
+        public IRepositoryBase<Actor> actorRepository { get; set;  }
+        public IRepositoryBase<Category> categoryRepository { get; set;  }
+        #endregion
+
+        #region Property Definitions
         public DateTime ReleaseDate
         {
             get
@@ -35,6 +61,57 @@ namespace FileNameTagger
                 {
                     releaseDate = value;
                     PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                }
+            }
+        }
+
+        public Studio SelectedStudio
+        {
+            get
+            {
+                return selectedStudio;
+            }
+
+            set
+            {
+                if (selectedStudio != value)
+                {
+                    selectedStudio = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedStudio"));
+                }
+            }
+        }
+
+        public Actor SelectedActor
+        {
+            get
+            {
+                return selectedActor;
+            }
+
+            set
+            {
+                if (selectedActor != value)
+                {
+                    selectedActor = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedActor"));
+                }
+            }
+        }
+
+        public Category SelectedCategory
+        {
+            get
+            {
+                return selectedCategory;
+            }
+
+            set
+            {
+                if (selectedCategory != value)
+                {
+                    selectedCategory = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedCategory"));
                 }
             }
         }
@@ -196,39 +273,135 @@ namespace FileNameTagger
                 }
             }
         }
+        #endregion
 
         public MainWindowViewModel()
         {
+
             this.AddFileCommand = new RelayCommand(OnAddFile);
             this.SaveTagCommand = new RelayCommand(OnSaveTag);
-            ReadDatabase();
+            this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
+            this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
+            this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
+
+            initDatabase();
             ReleaseDate = DateTime.Now; 
             this.LoadedFile = new File("No File Selected");
+            this.Title = "";
             this.Tag = new Tag(this.LoadedFile);
             this.exportedTag = "No Tag Created For File";
         }
 
-        public RelayCommand<File> DeleteFileCommand { get; private set; } 
-
-        public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
-        public RelayCommand SaveTagCommand { get; private set; }
-
-        private void ReadDatabase()
+        private void initDatabase()
         {
-            using (SQLite.SQLiteConnection connection = new SQLite.SQLiteConnection(App.databasePath))
+            var connection = new SQLiteAsyncConnection(App.databasePath);
+            connection.CreateTableAsync<Actor>();
+            connection.CreateTableAsync<Studio>();
+            connection.CreateTableAsync<Category>();
+
+            this.studioRepository = new RepositoryBase<Studio>(connection);
+            this.actorRepository = new RepositoryBase<Actor>(connection);
+            this.categoryRepository = new RepositoryBase<Category>(connection);
+
+            var actors = connection.Table<Actor>().OrderBy(actors => actors.Name).ToListAsync().Result;
+            var categories = connection.Table<Category>().OrderBy(categories => categories.Name).ToListAsync().Result;
+            var studios = connection.Table<Studio>().OrderBy(studios => studios.Name).ToListAsync().Result;
+
+            this.Actors = new ObservableCollection<Actor>(actors);
+            this.Categories = new ObservableCollection<Category>(categories);
+            this.Studios = new ObservableCollection<Studio>(studios);
+        }
+
+        private void UpdateStaticData(object dataToUpdate)
+        {
+            if (dataToUpdate == null)
             {
-                connection.CreateTable<Actor>();
-                connection.CreateTable<Studio>();
-                connection.CreateTable<Category>();
+                return; 
+            }
+            var type = dataToUpdate.GetType(); 
+            if (type == null)
+            {
+                throw new ArgumentNullException();
+            }else if (type == typeof(Studio))
+            {
+                var studio = dataToUpdate as Studio; 
+                this.studioRepository.Update(studio);
+                //var studioToUpdate = this.studios.Where(x => x.StudioId == studio.StudioId).FirstOrDefault();
+            }else if (type == typeof(Actor))
+            {
+                var actor = dataToUpdate as Actor;
+                this.actorRepository.Update(actor); 
+            }else if (type == typeof(Category))
+            {
+                var category = dataToUpdate as Category;
+                this.categoryRepository.Update(category);
+            }
 
-                var actors = connection.Table<Actor>().ToList().OrderBy(actors => actors.Name).ToList();
-                var categories = connection.Table<Category>().ToList().OrderBy(categories => categories.Name).ToList();
-                var studios = connection.Table<Studio>().ToList().OrderBy(studios => studios.Name).ToList();
+        }
 
-                this.Actors = new ObservableCollection<Actor>(actors);
-                this.Categories = new ObservableCollection<Category>(categories);
-                this.Studios = new ObservableCollection<Studio>(studios);
+        private void DeleteStaticData(object dataToDelete)
+        {
+            if (dataToDelete == null)
+            {
+                return;
+            }
+            switch (dataToDelete.GetType().Name)
+            {
+                case nameof(Studio):
+                    var studioToDelete = dataToDelete as Studio;
+                    this.studioRepository.Delete(studioToDelete);
+                    this.Studios.Remove(studioToDelete);
+                    break;
+                case nameof(Actor):
+                    var actorToDelete = dataToDelete as Actor;
+                    this.actorRepository.Delete(actorToDelete);
+                    this.Actors.Remove(actorToDelete);
+                    break;
+                case nameof(Category):
+                    var categoryToDelete = dataToDelete as Category;
+                    this.categoryRepository.Delete(categoryToDelete);
+                    this.Categories.Remove(categoryToDelete);
+                    break;
+            }
+        }
 
+        private void AddStaticData(object dataToAdd)
+        {
+            switch (dataToAdd.GetType().Name)
+            {
+                case nameof(Studio):
+                    var studioWithInfo = dataToAdd as Studio;
+                    string? studioName = studioWithInfo.Name; 
+                    if (string.IsNullOrWhiteSpace(studioName))
+                    {
+                        return; 
+                    }
+                    var studioToAdd = new Studio(studioName);
+                    this.studioRepository.Create(studioToAdd);
+                    this.Studios.Add(studioToAdd);
+                    break;
+                case nameof(Actor):
+                    var actorWithInfo = dataToAdd as Actor;
+                    string? actorName = actorWithInfo.Name;
+                    if (string.IsNullOrWhiteSpace(actorName))
+                    {
+                        return;
+                    }
+                    var actorToAdd = new Actor(actorName);
+                    this.actorRepository.Create(actorToAdd);
+                    this.Actors.Add(actorToAdd);
+                    break;
+                case nameof(Category):
+                    var categoryWithInfo = dataToAdd as Category;
+                    string? categoryName = categoryWithInfo.Name;
+                    if (string.IsNullOrWhiteSpace(categoryName))
+                    {
+                        return;
+                    }
+                    var categoryToAdd = new Category(categoryName);
+                    this.categoryRepository.Create(categoryToAdd);
+                    this.Categories.Add(categoryToAdd);
+                    break;
             }
         }
 
@@ -253,7 +426,7 @@ namespace FileNameTagger
 
         }
 
-        void OnAddFile()
+        private void OnAddFile()
         {
             var fileToAdd = (new File (this.SelectFileFromFileExplorer()));
             this.LoadedFile = fileToAdd; 
