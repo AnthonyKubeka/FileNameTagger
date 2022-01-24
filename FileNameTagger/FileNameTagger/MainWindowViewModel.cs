@@ -287,6 +287,7 @@ namespace FileNameTagger
             initDatabase();
             ReleaseDate = DateTime.Now; 
             this.LoadedFile = new File("No File Selected");
+            this.Title = "";
             this.Tag = new Tag(this.LoadedFile);
             this.exportedTag = "No Tag Created For File";
         }

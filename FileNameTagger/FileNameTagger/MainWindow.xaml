@@ -9,10 +9,8 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Height="600" Width="920"
-        WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         Background="Transparent"
-        AllowsTransparency="True"
         ShowInTaskbar="True"
         WindowStartupLocation="CenterOwner"
         WindowState="Normal"
@@ -118,7 +116,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0">Title:</TextBlock>
-                        <TextBox Grid.Column ="1" Margin="5" Padding="5"/>
+                        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Grid.Column ="1" Margin="5" Padding="5"/>
                     </Grid>
                     <Grid x:Name="ResolutionBox">
                         <Grid.ColumnDefinitions>
