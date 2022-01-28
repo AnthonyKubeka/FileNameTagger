@@ -232,6 +232,33 @@ namespace FileNameTagger
             }
         }
 
+        public void SetResolutionFromFileInfo(string filename)
+        {
+            var ffProbe = new NReco.VideoInfo.FFProbe();
+            var videoInfo = ffProbe.GetMediaInfo(filename);
+
+            var resolution = videoInfo.Streams[0].Height;
+            switch (resolution)
+            {
+                case 2160:
+                    this.selectedResolution = ResolutionsEnum.UHD; 
+                    break;
+                case 1080:
+                    this.selectedResolution = ResolutionsEnum.FHD;
+                    break;
+                case 1440:
+                    this.selectedResolution = ResolutionsEnum.QHD;
+                    break;
+                case 720:
+                    this.selectedResolution = ResolutionsEnum.HD;
+                    break;
+                default:
+                    this.selectedResolution = ResolutionsEnum.SD;
+                    break;
+            }
+                
+        }
+
         public string SelectFileFromFileExplorer()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
@@ -243,7 +270,9 @@ namespace FileNameTagger
             if (result == true)
             {
                 string filename = dialog.FileName;
+
                 this.loadedFileName = "Hello Mojo"; 
+
                 return filename;
             }
             else
@@ -255,7 +284,9 @@ namespace FileNameTagger
 
         void OnAddFile()
         {
-            var fileToAdd = (new File (this.SelectFileFromFileExplorer()));
+            var filename = SelectFileFromFileExplorer();
+            var fileToAdd = new File (filename);
+            SetResolutionFromFileInfo(filename);
             this.LoadedFile = fileToAdd; 
         }
 
