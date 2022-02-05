@@ -30,7 +30,7 @@
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <CheckBox IsChecked="{Binding Path=IsChecked}">
+                <CheckBox IsChecked="{Binding Path=IsChecked, UpdateSourceTrigger=PropertyChanged}">
                         <WrapPanel>
                         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
                         <Button Grid.Column="2" 
@@ -92,7 +92,8 @@
                 <MenuItem Header="_Load File"
                           Command ="{Binding AddFileCommand}">
                 </MenuItem>
-                <MenuItem Header="_New Tag"/>
+                <MenuItem Header="_New Tag"
+                          Command="{Binding ClearTagCommand}"/>
                 <MenuItem Header="_Save Tag"
                           Command="{Binding SaveTagCommand}"/>
             </MenuItem>
@@ -122,13 +123,14 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock
                             Grid.Column="1"
                             Text="Resolution:"
                             />
                         <ComboBox
-                            Grid.Column="2"
+                            Grid.Column="3"
                             HorizontalAlignment="Center" 
                             VerticalAlignment="Center" 
                             MinWidth="150" 

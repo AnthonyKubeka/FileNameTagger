@@ -39,6 +39,7 @@ namespace FileNameTagger
 
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
+        public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand<object> AddStaticDataCommand { get; private set; }
         public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
         public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
@@ -280,6 +281,7 @@ namespace FileNameTagger
 
             this.AddFileCommand = new RelayCommand(OnAddFile);
             this.SaveTagCommand = new RelayCommand(OnSaveTag);
+            this.ClearTagCommand = new RelayCommand(OnNewTag); 
             this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
             this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
             this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
@@ -310,6 +312,7 @@ namespace FileNameTagger
             this.Actors = new ObservableCollection<Actor>(actors);
             this.Categories = new ObservableCollection<Category>(categories);
             this.Studios = new ObservableCollection<Studio>(studios);
+
         }
 
         private void UpdateStaticData(object dataToUpdate)
@@ -414,19 +417,19 @@ namespace FileNameTagger
             switch (resolution)
             {
                 case 2160:
-                    this.selectedResolution = ResolutionsEnum.UHD; 
+                    this.SelectedResolution = ResolutionsEnum.UHD; 
                     break;
                 case 1080:
-                    this.selectedResolution = ResolutionsEnum.FHD;
+                    this.SelectedResolution = ResolutionsEnum.FHD;
                     break;
                 case 1440:
-                    this.selectedResolution = ResolutionsEnum.QHD;
+                    this.SelectedResolution = ResolutionsEnum.QHD;
                     break;
                 case 720:
-                    this.selectedResolution = ResolutionsEnum.HD;
+                    this.SelectedResolution = ResolutionsEnum.HD;
                     break;
                 default:
-                    this.selectedResolution = ResolutionsEnum.SD;
+                    this.SelectedResolution = ResolutionsEnum.SD;
                     break;
             }
                 
@@ -457,14 +460,38 @@ namespace FileNameTagger
 
         private void OnAddFile()
         {
+            OnNewTag();
             var filename = SelectFileFromFileExplorer();
             var fileToAdd = new File (filename);
             SetResolutionFromFileInfo(filename);
             this.LoadedFile = fileToAdd; 
         }
 
+        private void OnNewTag()
+        {
+            foreach(var actor in Actors)
+            {
+                actor.IsChecked = false;
+            }
+            foreach (var studio in Studios)
+            {
+                studio.IsChecked = false;
+            }
+            foreach (var category in Categories)
+            {
+                category.IsChecked = false;
+            }
+
+            this.Title = "";
+        }
+
         void OnSaveTag()
         {
+            foreach (var studio in Studios)
+            {
+                if (studio.IsChecked)
+                    studio.Update(false);
+            }
             var tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate);
             this.Tag = tagToSave;
             this.ExportedTag = this.Tag.ExportTagName();
