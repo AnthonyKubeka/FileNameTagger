@@ -32,6 +32,20 @@ namespace Domain
             File = file; 
         }
 
+        private string ConvertResolutionEnumToString(ResolutionsEnum resolution)
+        {
+            var resolutionsConversionDictionary = new Dictionary<ResolutionsEnum, string>()
+           {
+               {ResolutionsEnum.SD, "SD" },
+               {ResolutionsEnum.HD, "720p" },
+               {ResolutionsEnum.FHD, "1080p" },
+               {ResolutionsEnum.QHD, "1440p" },
+               {ResolutionsEnum.UHD, "2160p" },
+           };
+
+            return resolutionsConversionDictionary[resolution];
+        }
+
         public string ExportTagName()
         {
             var studiosString = string.Join("-", this.Studios.Select(x => x.Name));
@@ -44,7 +58,7 @@ namespace Domain
                 titleWithDash = $"{this.Title}-";
             }
 
-            var tag = $"{studiosString}-{titleWithDash}{this.Resolution}-{actorsString}-{categoriesString}-{this.ReleaseDate.ToShortDateString()}";
+            var tag = $"{studiosString}-{titleWithDash}{this.ConvertResolutionEnumToString(this.Resolution)}-{actorsString}-{categoriesString}-{this.ReleaseDate.ToShortDateString()}";
             return tag; 
             
         }

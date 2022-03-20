@@ -24,15 +24,17 @@ namespace FileNameTagger
         private Studio selectedStudio;
         private Actor selectedActor;
         private Category selectedCategory;
+        private string studioToAddName;
         private ObservableCollection<Studio> studios;
         private ObservableCollection<Actor> actors;
         private ResolutionsEnum selectedResolution; 
         private ObservableCollection<Category> categories;
         private Tag tag;
         private DateTime releaseDate;
-        #endregion
+        private Dictionary<ResolutionsEnum, string> resolutionsConversionDictionary;  
+#endregion
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
+public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
 
         #region Commands
         public RelayCommand<File> DeleteFileCommand { get; private set; }
@@ -41,6 +43,9 @@ namespace FileNameTagger
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand<object> AddStaticDataCommand { get; private set; }
+        public RelayCommand<string> AddStudioCommand { get; private set; }
+        public RelayCommand<string> AddCategoryCommand { get; private set; }
+        public RelayCommand<string> AddActorCommand { get; }
         public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
         public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
         public IRepositoryBase<Studio> studioRepository { get; set;  }
@@ -62,6 +67,23 @@ namespace FileNameTagger
                 {
                     releaseDate = value;
                     PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                }
+            }
+        }
+
+        public string StudioToAddName
+        {
+            get
+            {
+                return studioToAddName; 
+            }
+
+            set
+            {
+                if (studioToAddName != value)
+                {
+                    studioToAddName = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("StudioToAddName"));
                 }
             }
         }
@@ -285,6 +307,9 @@ namespace FileNameTagger
             this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
             this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
             this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
+            this.AddStudioCommand = new RelayCommand<string>(AddStudio);
+            this.AddCategoryCommand = new RelayCommand<string>(AddCategory);
+            this.AddActorCommand = new RelayCommand<string>(AddActor);
 
             initDatabase();
             ReleaseDate = DateTime.Now; 
@@ -408,6 +433,39 @@ namespace FileNameTagger
             }
         }
 
+        private void AddCategory(string categoryToAddName)
+        {
+            if (string.IsNullOrWhiteSpace(categoryToAddName))
+            {
+                return;
+            }
+            var categoryToAdd = new Category(categoryToAddName);
+            this.categoryRepository.Create(categoryToAdd);
+            this.Categories.Add(categoryToAdd);        
+        }
+
+        private void AddActor(string actorToAddName)
+        {
+            if (string.IsNullOrWhiteSpace(actorToAddName))
+            {
+                return;
+            }
+            var actorToAdd = new Actor(actorToAddName);
+            this.actorRepository.Create(actorToAdd);
+            this.Actors.Add(actorToAdd);
+        }
+
+        private void AddStudio(string studioToAddName)
+        {
+            if (string.IsNullOrWhiteSpace(studioToAddName))
+            {
+                return;
+            }
+            var studioToAdd = new Studio(studioToAddName);
+            this.studioRepository.Create(studioToAdd);
+            this.Studios.Add(studioToAdd);
+        }
+
         public void SetResolutionFromFileInfo(string filename)
         {
             var ffProbe = new NReco.VideoInfo.FFProbe();
@@ -487,11 +545,6 @@ namespace FileNameTagger
 
         void OnSaveTag()
         {
-            foreach (var studio in Studios)
-            {
-                if (studio.IsChecked)
-                    studio.Update(false);
-            }
             var tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate);
             this.Tag = tagToSave;
             this.ExportedTag = this.Tag.ExportTagName();

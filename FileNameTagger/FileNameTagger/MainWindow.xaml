@@ -19,31 +19,20 @@
 
     <Window.Resources>
         <DataTemplate x:Key="StaticDataItemDataTemplate">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
                 <CheckBox IsChecked="{Binding Path=IsChecked, UpdateSourceTrigger=PropertyChanged}">
-                        <WrapPanel>
+                    <WrapPanel>
                         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
-                        <Button Grid.Column="2" 
-                                Command="{Binding DataContext.AddStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
-                                CommandParameter="{Binding}"
-                                HorizontalAlignment="Left"
-                                Padding="10,10,10,10"
-                                Margin="10,0,0,0"
-                                >
-                            <materialDesign:PackIcon
-                                        Kind="Plus"
-                                        Height="12"/>
-                        </Button>
                         <Button Grid.Column="3" 
                                 Command="{Binding DataContext.UpdateStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
                                 CommandParameter="{Binding}"
@@ -69,8 +58,8 @@
                                         Padding="0,10,10,0"/>
                         </Button>
                     </WrapPanel>
-                    </CheckBox>
-                </Grid>
+                </CheckBox>
+            </Grid>
         </DataTemplate>
         <!--For data binding the enum-->
         <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
@@ -89,28 +78,28 @@
         <StackPanel>
             <Menu Margin="0,0,0,20">
                 <MenuItem Header="_File" Style="{StaticResource MenuButtonTheme}" >
-                <MenuItem Header="_Load File"
+                    <MenuItem Header="_Load File"
                           Command ="{Binding AddFileCommand}">
-                </MenuItem>
-                <MenuItem Header="_New Tag"
+                    </MenuItem>
+                    <MenuItem Header="_New Tag"
                           Command="{Binding ClearTagCommand}"/>
-                <MenuItem Header="_Save Tag"
+                    <MenuItem Header="_Save Tag"
                           Command="{Binding SaveTagCommand}"/>
-            </MenuItem>
-        </Menu>
-        <Grid x:Name ="ChildViews">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                    <TextBlock FontSize="18" Margin="0,0,5,5">Selected File: </TextBlock> 
-                    <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
-                </StackPanel>
+                </MenuItem>
+            </Menu>
+            <Grid x:Name ="ChildViews">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
+                        <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
+                    </StackPanel>
                     <Grid x:Name="TitleBox">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -144,44 +133,98 @@
                                          SelectedItem="{Binding SelectedStudio}"
                              ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
                              IsSynchronizedWithCurrentItem="True"/>
-                            <TextBox AcceptsReturn="False" Text="{Binding StudioToAdd, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding 
-                                    Key="Enter" 
-                                    Command="{Binding AddStudioCommand}" 
-                                    CommandParameter="{Binding Path=Text, RelativeSource={RelativeSource AncestorType={x:Type TextBox}}}" />
-                                </TextBox.InputBindings>
-                            </TextBox>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                            Grid.Column="0"
+                            Text="Add New Studio:"
+                            />
+                                <TextBox Grid.Column="1" AcceptsReturn="False">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding 
+                                         Key="Enter" 
+                                        Command="{Binding AddStudioCommand}"
+                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Grid>
+
                         </StackPanel>
                     </Expander>
                     <Expander Header="Actors">
-                        <ListBox 
+                        <StackPanel>
+
+                            <ListBox 
                              MaxHeight="150"
                              ItemsSource="{Binding Actors}"
                              ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
                              SelectedItem="{Binding SelectedActor}"
                              IsSynchronizedWithCurrentItem="True"/>
-                </Expander>
-                <Expander Header="Categories">
-                        <ListBox 
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                            Grid.Column="0"
+                            Text="Add New Actor:"
+                            />
+                                <TextBox Grid.Column="1" AcceptsReturn="False">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding 
+                                         Key="Enter" 
+                                        Command="{Binding AddActorCommand}"
+                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Grid>
+                        </StackPanel>
+
+
+                    </Expander>
+                    <Expander Header="Categories">
+                        <StackPanel>
+                            <ListBox 
                             MaxHeight="150"
                             ItemsSource="{Binding Categories}"
                             ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
                             SelectedItem="{Binding SelectedCategory}"
                             IsSynchronizedWithCurrentItem="True"/>
-                </Expander>
-                <Label>Release Date:</Label>
-                <DatePicker SelectedDate="{Binding ReleaseDate}" ></DatePicker>
-                <Grid x:Name="ExportedTag">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
-                    <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
-                </Grid>
-            </StackPanel>
-        </Grid>
-    </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"/>
+                                    <ColumnDefinition Width="7*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                            Grid.Column="0"
+                            Text="Add New Category:"
+                            />
+                                <TextBox Grid.Column="1" AcceptsReturn="False">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding 
+                                         Key="Enter" 
+                                        Command="{Binding AddCategoryCommand}"
+                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+                    <Label>Release Date:</Label>
+                    <DatePicker SelectedDate="{Binding ReleaseDate}" ></DatePicker>
+                    <Grid x:Name="ExportedTag">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
+                        <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
     </Border>
 </Window>
