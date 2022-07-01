@@ -14,9 +14,10 @@ namespace Domain
         public ResolutionsEnum Resolution { get; set; }
         public string ExportedTagName { get; set; }
         public File File;
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+        public string ReleaseYear { get; set; }
 
-        public Tag(IEnumerable<Actor> actors, IEnumerable<Category> categories, IEnumerable<Studio> studios, string title, ResolutionsEnum resolution, File file, DateTime releaseDate)
+        public Tag(IEnumerable<Actor> actors, IEnumerable<Category> categories, IEnumerable<Studio> studios, string title, ResolutionsEnum resolution, File file, DateTime? releaseDate, string releaseYear)
         {
             Actors = actors;
             Categories = categories;
@@ -25,6 +26,7 @@ namespace Domain
             Resolution = resolution;
             File = file;
             ReleaseDate = releaseDate;
+            ReleaseYear = releaseYear; 
         }
 
         public Tag(File file)
@@ -58,7 +60,17 @@ namespace Domain
                 titleWithDash = $"{this.Title}-";
             }
 
-            var tag = $"{studiosString}-{titleWithDash}{this.ConvertResolutionEnumToString(this.Resolution)}-{actorsString}-{categoriesString}-{this.ReleaseDate.ToShortDateString()}";
+            string releaseDate = null; 
+            if (this.ReleaseDate != null)
+            {
+                releaseDate = this.ReleaseDate.Value.ToShortDateString();
+            }
+            else
+            {
+                releaseDate = ReleaseYear; 
+            }
+
+            var tag = $"{studiosString}-{titleWithDash}{this.ConvertResolutionEnumToString(this.Resolution)}-{actorsString}-{categoriesString}-{releaseDate}";
             return tag; 
             
         }

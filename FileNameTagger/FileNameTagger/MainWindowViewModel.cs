@@ -11,9 +11,12 @@ using System.Windows.Input;
 using SQLite;
 using Repository;
 using System.Collections.Generic;
+using System.Windows ;
+using System.Diagnostics;
 
 namespace FileNameTagger
 {
+
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         #region Properties
@@ -25,16 +28,17 @@ namespace FileNameTagger
         private Actor selectedActor;
         private Category selectedCategory;
         private string studioToAddName;
+        private bool releaseDateYearOnly;
         private ObservableCollection<Studio> studios;
         private ObservableCollection<Actor> actors;
         private ResolutionsEnum selectedResolution; 
         private ObservableCollection<Category> categories;
         private Tag tag;
         private DateTime releaseDate;
-        private Dictionary<ResolutionsEnum, string> resolutionsConversionDictionary;  
-#endregion
+        private string releaseYear;
+        #endregion
 
-public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
+        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
 
         #region Commands
         public RelayCommand<File> DeleteFileCommand { get; private set; }
@@ -54,6 +58,24 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
         #endregion
 
         #region Property Definitions
+
+        public string ReleaseYear
+        {
+            get
+            {
+                return releaseYear;
+            }
+
+            set
+            {
+                if (releaseYear != value)
+                {
+                    releaseYear = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseYear"));
+                }
+            }
+        }
+
         public DateTime ReleaseDate
         {
             get
@@ -66,7 +88,7 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
                 if (releaseDate != value)
                 {
                     releaseDate = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDate"));
                 }
             }
         }
@@ -87,6 +109,48 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
                 }
             }
         }
+
+        public bool ReleaseDateYearOnly
+        {
+            get
+            {
+                return releaseDateYearOnly;
+            }
+
+            set
+            {
+                if (releaseDateYearOnly != value)
+                {
+                    releaseDateYearOnly = value;
+                    if (releaseDateYearOnly)
+                    {
+                        DatePickerVisibility = Visibility.Hidden;
+                        YearComboBoxVisibility = Visibility.Visible; 
+                    }
+                    else
+                    {
+                        DatePickerVisibility = Visibility.Visible;
+                        YearComboBoxVisibility = Visibility.Hidden;
+                    }
+                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDateYearOnly"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("DatePickerVisibility"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("YearComboBoxVisibility"));
+                }
+            }
+        }
+
+        public Visibility DatePickerVisibility { get; set; }
+        public Visibility YearComboBoxVisibility { get; set; }
+
+
+        public bool ReleaseDateNotYearOnly
+        {
+            get
+            {
+                return !releaseDateYearOnly;
+            }
+        }
+
 
         public Studio SelectedStudio
         {
@@ -300,7 +364,9 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
 
         public MainWindowViewModel()
         {
+            
 
+            #region Command Instantiations
             this.AddFileCommand = new RelayCommand(OnAddFile);
             this.SaveTagCommand = new RelayCommand(OnSaveTag);
             this.ClearTagCommand = new RelayCommand(OnNewTag); 
@@ -310,13 +376,18 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
             this.AddStudioCommand = new RelayCommand<string>(AddStudio);
             this.AddCategoryCommand = new RelayCommand<string>(AddCategory);
             this.AddActorCommand = new RelayCommand<string>(AddActor);
-
+            #endregion
+            #region Componenent and data initialisations
             initDatabase();
             ReleaseDate = DateTime.Now; 
             this.LoadedFile = new File("No File Selected");
             this.Title = "";
             this.Tag = new Tag(this.LoadedFile);
             this.exportedTag = "No Tag Created For File";
+            this.ReleaseDateYearOnly = false;
+            DatePickerVisibility = Visibility.Visible;
+            YearComboBoxVisibility = Visibility.Hidden;
+            #endregion
         }
 
         private void initDatabase()
@@ -333,7 +404,7 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
             var actors = connection.Table<Actor>().OrderBy(actors => actors.Name).ToListAsync().Result;
             var categories = connection.Table<Category>().OrderBy(categories => categories.Name).ToListAsync().Result;
             var studios = connection.Table<Studio>().OrderBy(studios => studios.Name).ToListAsync().Result;
-
+           
             this.Actors = new ObservableCollection<Actor>(actors);
             this.Categories = new ObservableCollection<Category>(categories);
             this.Studios = new ObservableCollection<Studio>(studios);
@@ -498,7 +569,8 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.FileName = ""; 
             dialog.DefaultExt = ".mp4";
-
+            var data = new List<Studio>();
+            data.AddRange(this.Studios); 
             bool? result = dialog.ShowDialog();
 
             if (result == true)
@@ -545,7 +617,15 @@ public event PropertyChangedEventHandler PropertyChanged = delegate { }; //prope
 
         void OnSaveTag()
         {
-            var tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate);
+            Tag tagToSave = null; 
+            if (releaseDateYearOnly)
+            {
+               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, null, releaseYear);
+            }
+            else
+            {
+               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate, string.Empty);
+            }
             this.Tag = tagToSave;
             this.ExportedTag = this.Tag.ExportTagName();
         }
