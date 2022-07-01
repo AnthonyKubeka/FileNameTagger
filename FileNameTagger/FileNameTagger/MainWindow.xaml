@@ -68,15 +68,12 @@
                 <x:Type TypeName="shared:ResolutionsEnum"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <DataTemplate DataType="{x:Type local:ArtistsViewModel}">
-            <local:ArtistsView/>
-        </DataTemplate>
     </Window.Resources>
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Border Background="RoyalBlue">
-       <!-- <StackPanel>
+       <StackPanel>
             <Menu Margin="0,0,0,20">
                 <MenuItem Header="_File" Style="{StaticResource MenuButtonTheme}" >
                     <MenuItem Header="_Load File"
@@ -242,7 +239,6 @@
                     </Grid>
                 </StackPanel>
             </Grid>
-        </StackPanel> -->
-        <ContentControl Content="{Binding CurrentViewModel}"/>
+        </StackPanel>
     </Border>
 </Window>

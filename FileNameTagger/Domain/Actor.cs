@@ -1,4 +1,4 @@
-﻿kusing Shared;
+﻿using Shared;
 using SQLite; 
 namespace Domain
     //note on database structure: using sqlite-net-pcl
