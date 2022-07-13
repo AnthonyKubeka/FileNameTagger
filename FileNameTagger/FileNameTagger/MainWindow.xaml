@@ -8,7 +8,7 @@
         xmlns:shared="clr-namespace:Shared;assembly=Shared"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Height="600" Width="920"
+        Height="600" Width="920" 
         ResizeMode="CanResizeWithGrip"
         Background="Transparent"
         ShowInTaskbar="True"

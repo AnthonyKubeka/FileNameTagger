@@ -368,7 +368,7 @@ namespace FileNameTagger
 
             #region Command Instantiations
             this.AddFileCommand = new RelayCommand(OnAddFile);
-            this.SaveTagCommand = new RelayCommand(OnSaveTag);
+           // this.SaveTagCommand = new RelayCommand(OnSaveTag);
             this.ClearTagCommand = new RelayCommand(OnNewTag); 
             this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
             this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
@@ -382,7 +382,7 @@ namespace FileNameTagger
             ReleaseDate = DateTime.Now; 
             this.LoadedFile = new File("No File Selected");
             this.Title = "";
-            this.Tag = new Tag(this.LoadedFile);
+           // this.Tag = new Tag(this.LoadedFile);
             this.exportedTag = "No Tag Created For File";
             this.ReleaseDateYearOnly = false;
             DatePickerVisibility = Visibility.Visible;
@@ -615,7 +615,7 @@ namespace FileNameTagger
             this.Title = "";
         }
 
-        void OnSaveTag()
+/*        void OnSaveTag()
         {
             Tag tagToSave = null; 
             if (releaseDateYearOnly)
@@ -628,6 +628,6 @@ namespace FileNameTagger
             }
             this.Tag = tagToSave;
             this.ExportedTag = this.Tag.ExportTagName();
-        }
+        }*/
     }
 }
