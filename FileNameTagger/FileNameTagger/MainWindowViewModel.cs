@@ -17,7 +17,7 @@ using System.Diagnostics;
 namespace FileNameTagger
 {
 
-    public class MainWindowViewModel : INotifyPropertyChanged
+    public class MainWindowViewModel : BaseViewModel
     {
         #region Properties
         private File loadedFile;
@@ -25,17 +25,14 @@ namespace FileNameTagger
         private string title;
         private string exportedTag;
         private Studio selectedStudio;
-        private Actor selectedActor;
-        private Category selectedCategory;
         private string studioToAddName;
         private bool releaseDateYearOnly;
         private ObservableCollection<Studio> studios;
-        private ObservableCollection<Actor> actors;
         private ResolutionsEnum selectedResolution; 
-        private ObservableCollection<Category> categories;
         private Tag tag;
         private DateTime releaseDate;
         private string releaseYear;
+        private ObservableCollection<TagTypeViewModel> tagTypeViewModels; 
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
@@ -53,11 +50,23 @@ namespace FileNameTagger
         public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
         public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
         public IRepositoryBase<Studio> studioRepository { get; set;  }
-        public IRepositoryBase<Actor> actorRepository { get; set;  }
-        public IRepositoryBase<Category> categoryRepository { get; set;  }
+        public IRepositoryBase<TagType> tagTypesRepository { get; set;  }
         #endregion
 
         #region Property Definitions
+
+        public ObservableCollection<TagTypeViewModel> TagTypeViewModels
+        {
+            get
+            {
+                return tagTypeViewModels;
+            }
+
+            set
+            {
+                SetProperty(ref tagTypeViewModels, value);
+            }
+        }
 
         public string ReleaseYear
         {
@@ -169,40 +178,6 @@ namespace FileNameTagger
             }
         }
 
-        public Actor SelectedActor
-        {
-            get
-            {
-                return selectedActor;
-            }
-
-            set
-            {
-                if (selectedActor != value)
-                {
-                    selectedActor = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedActor"));
-                }
-            }
-        }
-
-        public Category SelectedCategory
-        {
-            get
-            {
-                return selectedCategory;
-            }
-
-            set
-            {
-                if (selectedCategory != value)
-                {
-                    selectedCategory = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedCategory"));
-                }
-            }
-        }
-
         public string ExportedTag
         {
             get
@@ -309,41 +284,8 @@ namespace FileNameTagger
                 }
             }
         }
-
-        public ObservableCollection<Actor> Actors
-        {
-            get
-            {
-                return actors;
-            }
-
-            set
-            {
-                if (actors != value)
-                {
-                    actors = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Actors"));
-                }
-            }
-        }
-
-        public ObservableCollection<Category> Categories
-        {
-            get
-            {
-                return categories;
-            }
-
-            set
-            {
-                if (categories != value)
-                {
-                    categories = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Categories"));
-                }
-            }
-        }
-
+        
+        public Collection<TagType> TagTypes { get; set; }
         public ResolutionsEnum SelectedResolution
         {
             get
@@ -374,8 +316,6 @@ namespace FileNameTagger
             this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
             this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
             this.AddStudioCommand = new RelayCommand<string>(AddStudio);
-            this.AddCategoryCommand = new RelayCommand<string>(AddCategory);
-            this.AddActorCommand = new RelayCommand<string>(AddActor);
             #endregion
             #region Componenent and data initialisations
             initDatabase();
@@ -387,28 +327,31 @@ namespace FileNameTagger
             this.ReleaseDateYearOnly = false;
             DatePickerVisibility = Visibility.Visible;
             YearComboBoxVisibility = Visibility.Hidden;
+            var artistsTagType = new TagType("Artists", TagTypeTypeEnum.TextList);
             #endregion
         }
 
         private void initDatabase()
         {
             var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Actor>();
             connection.CreateTableAsync<Studio>();
-            connection.CreateTableAsync<Category>();
+            connection.CreateTableAsync<TagType>();
 
             this.studioRepository = new RepositoryBase<Studio>(connection);
-            this.actorRepository = new RepositoryBase<Actor>(connection);
-            this.categoryRepository = new RepositoryBase<Category>(connection);
-
-            var actors = connection.Table<Actor>().OrderBy(actors => actors.Name).ToListAsync().Result;
-            var categories = connection.Table<Category>().OrderBy(categories => categories.Name).ToListAsync().Result;
+            this.tagTypesRepository = new RepositoryBase<TagType>(connection);
             var studios = connection.Table<Studio>().OrderBy(studios => studios.Name).ToListAsync().Result;
-           
-            this.Actors = new ObservableCollection<Actor>(actors);
-            this.Categories = new ObservableCollection<Category>(categories);
+            var tagTypes = connection.Table<TagType>().OrderBy(tagTypes => tagTypes.Name).ToListAsync().Result; 
             this.Studios = new ObservableCollection<Studio>(studios);
+            this.TagTypes = new Collection<TagType>(tagTypes);
+            var tagTypeViewModels = new Collection<TagTypeViewModel>();
+           
+            foreach (var tagType in this.TagTypes)
+            {
+                tagTypeViewModels.Add(new TagTypeViewModel(tagType));   
+            }
 
+            this.TagTypeViewModels = new ObservableCollection<TagTypeViewModel>(tagTypeViewModels);
+            Console.WriteLine("hi");
         }
 
         private void UpdateStaticData(object dataToUpdate)
@@ -425,15 +368,6 @@ namespace FileNameTagger
             {
                 var studio = dataToUpdate as Studio; 
                 this.studioRepository.Update(studio);
-                //var studioToUpdate = this.studios.Where(x => x.StudioId == studio.StudioId).FirstOrDefault();
-            }else if (type == typeof(Actor))
-            {
-                var actor = dataToUpdate as Actor;
-                this.actorRepository.Update(actor); 
-            }else if (type == typeof(Category))
-            {
-                var category = dataToUpdate as Category;
-                this.categoryRepository.Update(category);
             }
 
         }
@@ -450,16 +384,6 @@ namespace FileNameTagger
                     var studioToDelete = dataToDelete as Studio;
                     this.studioRepository.Delete(studioToDelete);
                     this.Studios.Remove(studioToDelete);
-                    break;
-                case nameof(Actor):
-                    var actorToDelete = dataToDelete as Actor;
-                    this.actorRepository.Delete(actorToDelete);
-                    this.Actors.Remove(actorToDelete);
-                    break;
-                case nameof(Category):
-                    var categoryToDelete = dataToDelete as Category;
-                    this.categoryRepository.Delete(categoryToDelete);
-                    this.Categories.Remove(categoryToDelete);
                     break;
             }
         }
@@ -479,51 +403,7 @@ namespace FileNameTagger
                     this.studioRepository.Create(studioToAdd);
                     this.Studios.Add(studioToAdd);
                     break;
-                case nameof(Actor):
-                    var actorWithInfo = dataToAdd as Actor;
-                    string? actorName = actorWithInfo.Name;
-                    if (string.IsNullOrWhiteSpace(actorName))
-                    {
-                        return;
-                    }
-                    var actorToAdd = new Actor(actorName);
-                    this.actorRepository.Create(actorToAdd);
-                    this.Actors.Add(actorToAdd);
-                    break;
-                case nameof(Category):
-                    var categoryWithInfo = dataToAdd as Category;
-                    string? categoryName = categoryWithInfo.Name;
-                    if (string.IsNullOrWhiteSpace(categoryName))
-                    {
-                        return;
-                    }
-                    var categoryToAdd = new Category(categoryName);
-                    this.categoryRepository.Create(categoryToAdd);
-                    this.Categories.Add(categoryToAdd);
-                    break;
             }
-        }
-
-        private void AddCategory(string categoryToAddName)
-        {
-            if (string.IsNullOrWhiteSpace(categoryToAddName))
-            {
-                return;
-            }
-            var categoryToAdd = new Category(categoryToAddName);
-            this.categoryRepository.Create(categoryToAdd);
-            this.Categories.Add(categoryToAdd);        
-        }
-
-        private void AddActor(string actorToAddName)
-        {
-            if (string.IsNullOrWhiteSpace(actorToAddName))
-            {
-                return;
-            }
-            var actorToAdd = new Actor(actorToAddName);
-            this.actorRepository.Create(actorToAdd);
-            this.Actors.Add(actorToAdd);
         }
 
         private void AddStudio(string studioToAddName)
@@ -599,17 +479,9 @@ namespace FileNameTagger
 
         private void OnNewTag()
         {
-            foreach(var actor in Actors)
-            {
-                actor.IsChecked = false;
-            }
             foreach (var studio in Studios)
             {
                 studio.IsChecked = false;
-            }
-            foreach (var category in Categories)
-            {
-                category.IsChecked = false;
             }
 
             this.Title = "";

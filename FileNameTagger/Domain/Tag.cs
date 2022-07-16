@@ -12,6 +12,8 @@ namespace Domain
         public int TagId { get; set; }
         public int TagTypeId { get; set; }
         public string Value { get; set; }
+        [Ignore]
+        public bool IsChecked { get; set; }
 
         public Tag()
         {
@@ -22,6 +24,7 @@ namespace Domain
         {
             TagTypeId = tagTypeId; 
             Value = value;
+            IsChecked = false;
         }
 
         private string ConvertResolutionEnumToString(ResolutionsEnum resolution)

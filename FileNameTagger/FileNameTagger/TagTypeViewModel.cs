@@ -17,6 +17,7 @@ namespace FileNameTagger
         public IRepositoryBase<Tag> TagRepository { get; set; }
 
         public TagType TagType //should be passed in from parent view and doesn't change
+                               //the TagTypeTypeId determines what TagTypeView to bind to this viewmodel
         {
             get { return tagType; } 
             set { tagType = value; } 
@@ -35,10 +36,15 @@ namespace FileNameTagger
         }
 
         public RelayCommand<string> AddTagCommand { get; private set; }
+        public RelayCommand<Tag> UpdateTagDataCommand { get; private set; }
+        public RelayCommand<Tag> DeleteTagCommand { get; private set; }
 
-        public TagTypeViewModel()
+        public TagTypeViewModel(TagType tagType)
         {
+            this.tagType = tagType;
             this.AddTagCommand = new RelayCommand<string>(AddTag);
+            this.UpdateTagDataCommand = new RelayCommand<Tag>(UpdateTag);
+            this.DeleteTagCommand = new RelayCommand<Tag>(DeleteTag);
 
             InitDatabase();
         }
@@ -61,6 +67,22 @@ namespace FileNameTagger
 
             var tag = new Tag(this.TagType.TagTypeId, tagName);
             this.TagRepository.Create(tag);
+        }
+
+        private void UpdateTag(Tag tag)
+        {
+            if (tag == null)
+                return;
+
+            this.TagRepository.Update(tag);
+        }
+
+        private void DeleteTag(Tag tag)
+        {
+            if (tag == null)
+                return;
+
+            this.TagRepository.Delete(tag);
         }
     }
 }

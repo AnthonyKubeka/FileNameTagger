@@ -152,66 +152,8 @@
 
                         </StackPanel>
                     </Expander>
-                    <Expander Header="Actors">
-                        <StackPanel>
-
-                            <ListBox 
-                             MaxHeight="150"
-                             ItemsSource="{Binding Actors}"
-                             ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
-                             SelectedItem="{Binding SelectedActor}"
-                             IsSynchronizedWithCurrentItem="True"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*"/>
-                                    <ColumnDefinition Width="7*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                            Grid.Column="0"
-                            Text="Add New Actor:"
-                            />
-                                <TextBox Grid.Column="1" AcceptsReturn="False">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding 
-                                         Key="Enter" 
-                                        Command="{Binding AddActorCommand}"
-                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                            </Grid>
-                        </StackPanel>
-
-
-                    </Expander>
-                    <Expander Header="Categories">
-                        <StackPanel>
-                            <ListBox 
-                            MaxHeight="150"
-                            ItemsSource="{Binding Categories}"
-                            ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
-                            SelectedItem="{Binding SelectedCategory}"
-                            IsSynchronizedWithCurrentItem="True"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*"/>
-                                    <ColumnDefinition Width="7*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                            Grid.Column="0"
-                            Text="Add New Category:"
-                            />
-                                <TextBox Grid.Column="1" AcceptsReturn="False">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding 
-                                         Key="Enter" 
-                                        Command="{Binding AddCategoryCommand}"
-                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                            </Grid>
-                        </StackPanel>
-                    </Expander>
-                        <Label>Release Date:</Label>
+                    <ListBox MaxHeight="150" x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
+                    <Label>Release Date:</Label>
                     <CheckBox IsChecked="{Binding ReleaseDateYearOnly, UpdateSourceTrigger=PropertyChanged}">Year Only?</CheckBox>
                     <DatePicker Visibility="{Binding DatePickerVisibility}" SelectedDate="{Binding ReleaseDate}" SelectedDateFormat="Short" ></DatePicker>
                     <ComboBox Text="Choose Year" Visibility="{Binding YearComboBoxVisibility}" SelectedItem="{Binding ReleaseYear}">
