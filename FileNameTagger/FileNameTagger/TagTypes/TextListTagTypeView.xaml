@@ -1,4 +1,4 @@
-﻿<ContentControl x:Class="FileNameTagger.TextListTagTypeView"
+﻿<ContentControl x:Class="FileNameTagger.TagTypes.TextListTagTypeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -52,19 +52,13 @@
             </Grid>
         </DataTemplate>
     </Control.Resources>
-    <Control.DataContext>
-        <local:TagTypeViewModel/>
-    </Control.DataContext>
-    <Expander Header="{Binding TagType.Name}" 
-                  Height="366" 
-                  Width="535"
-                  >
+    <Expander Header="{Binding TagType.Name}">
         <StackPanel>
 
-            <ListBox 
+            <ListBox         HorizontalContentAlignment="Stretch"
                              MaxHeight="150"
                              ItemsSource="{Binding Tags}"
-                             ItemTemplate="{StaticResource TagTypeListItemDataTemplate}"
+                             ItemTemplate="{StaticResource TextListTagTypeItemDataTemplate}"
                              SelectedItem="{Binding SelectedTag}"
                              IsSynchronizedWithCurrentItem="True"/>
             <Grid>
@@ -74,7 +68,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock
                             Grid.Column="0"
-                            Text="{Binding Path=TagType.Name, StringFormat='Add New {0}s:'}" 
+                            Text="{Binding Path=TagType.Name, StringFormat='Add New {0}:'}" 
                             />
                 <TextBox Grid.Column="1" AcceptsReturn="False">
                     <TextBox.InputBindings>

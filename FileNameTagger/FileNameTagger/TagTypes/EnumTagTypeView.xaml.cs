@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace FileNameTagger
+namespace FileNameTagger.TagTypes
 {
     /// <summary>
-    /// Interaction logic for TextListTagTypeView.xaml
+    /// Interaction logic for EnumTagTypeView.xaml
     /// </summary>
-    public partial class TextListTagTypeView
+    public partial class EnumTagTypeView
     {
-        public TextListTagTypeView()
+        public EnumTagTypeView()
         {
             InitializeComponent();
         }

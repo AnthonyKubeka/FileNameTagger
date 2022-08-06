@@ -24,15 +24,12 @@ namespace FileNameTagger
         private string loadedFileName;
         private string title;
         private string exportedTag;
-        private Studio selectedStudio;
-        private string studioToAddName;
         private bool releaseDateYearOnly;
-        private ObservableCollection<Studio> studios;
-        private ResolutionsEnum selectedResolution; 
+        private ResolutionsEnum selectedResolution;
         private Tag tag;
         private DateTime releaseDate;
         private string releaseYear;
-        private ObservableCollection<TagTypeViewModel> tagTypeViewModels; 
+        private ObservableCollection<ITagTypeViewModel> tagTypeViewModels;
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
@@ -43,19 +40,13 @@ namespace FileNameTagger
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
-        public RelayCommand<object> AddStaticDataCommand { get; private set; }
-        public RelayCommand<string> AddStudioCommand { get; private set; }
-        public RelayCommand<string> AddCategoryCommand { get; private set; }
-        public RelayCommand<string> AddActorCommand { get; }
-        public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
-        public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
-        public IRepositoryBase<Studio> studioRepository { get; set;  }
-        public IRepositoryBase<TagType> tagTypesRepository { get; set;  }
-        #endregion
+        public IRepositoryBase<TagType> tagTypesRepository { get; set; }
+        public TagTypeViewModelFactory TagTypeViewModelFactory {get; set;}
+    #endregion
 
-        #region Property Definitions
+    #region Property Definitions
 
-        public ObservableCollection<TagTypeViewModel> TagTypeViewModels
+    public ObservableCollection<ITagTypeViewModel> TagTypeViewModels
         {
             get
             {
@@ -102,23 +93,6 @@ namespace FileNameTagger
             }
         }
 
-        public string StudioToAddName
-        {
-            get
-            {
-                return studioToAddName; 
-            }
-
-            set
-            {
-                if (studioToAddName != value)
-                {
-                    studioToAddName = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("StudioToAddName"));
-                }
-            }
-        }
-
         public bool ReleaseDateYearOnly
         {
             get
@@ -134,7 +108,7 @@ namespace FileNameTagger
                     if (releaseDateYearOnly)
                     {
                         DatePickerVisibility = Visibility.Hidden;
-                        YearComboBoxVisibility = Visibility.Visible; 
+                        YearComboBoxVisibility = Visibility.Visible;
                     }
                     else
                     {
@@ -157,24 +131,6 @@ namespace FileNameTagger
             get
             {
                 return !releaseDateYearOnly;
-            }
-        }
-
-
-        public Studio SelectedStudio
-        {
-            get
-            {
-                return selectedStudio;
-            }
-
-            set
-            {
-                if (selectedStudio != value)
-                {
-                    selectedStudio = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedStudio"));
-                }
             }
         }
 
@@ -230,7 +186,7 @@ namespace FileNameTagger
             {
                 if (loadedFileName != value)
                 {
-                    loadedFileName = value; 
+                    loadedFileName = value;
                     PropertyChanged(this, new PropertyChangedEventArgs("LoadedFileName"));
                 }
             }
@@ -268,23 +224,7 @@ namespace FileNameTagger
                 }
             }
         }
-        public ObservableCollection<Studio> Studios
-        {
-            get
-            {
-                return studios;
-            }
 
-            set
-            {
-                if (studios != value)
-                {
-                    studios = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Studios"));
-                }
-            }
-        }
-        
         public Collection<TagType> TagTypes { get; set; }
         public ResolutionsEnum SelectedResolution
         {
@@ -307,114 +247,39 @@ namespace FileNameTagger
         public MainWindowViewModel()
         {
             
-
             #region Command Instantiations
-            this.AddFileCommand = new RelayCommand(OnAddFile);
-           // this.SaveTagCommand = new RelayCommand(OnSaveTag);
-            this.ClearTagCommand = new RelayCommand(OnNewTag); 
-            this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
-            this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
-            this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
-            this.AddStudioCommand = new RelayCommand<string>(AddStudio);
+            AddFileCommand = new RelayCommand(OnAddFile);
+           // SaveTagCommand = new RelayCommand(OnSaveTag);
+            ClearTagCommand = new RelayCommand(OnNewTag);
             #endregion
+
             #region Componenent and data initialisations
+            TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
+            TagTypeViewModelFactory = new TagTypeViewModelFactory();
             initDatabase();
             ReleaseDate = DateTime.Now; 
-            this.LoadedFile = new File("No File Selected");
-            this.Title = "";
-           // this.Tag = new Tag(this.LoadedFile);
-            this.exportedTag = "No Tag Created For File";
-            this.ReleaseDateYearOnly = false;
+            LoadedFile = new File("No File Selected");
+            Title = "";
+            exportedTag = "No Tag Created For File";
+            ReleaseDateYearOnly = false;
             DatePickerVisibility = Visibility.Visible;
             YearComboBoxVisibility = Visibility.Hidden;
-            var artistsTagType = new TagType("Artists", TagTypeTypeEnum.TextList);
             #endregion
+            TagTypeViewModelFactory = new TagTypeViewModelFactory();
         }
 
         private void initDatabase()
         {
             var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Studio>();
             connection.CreateTableAsync<TagType>();
 
-            this.studioRepository = new RepositoryBase<Studio>(connection);
-            this.tagTypesRepository = new RepositoryBase<TagType>(connection);
-            var studios = connection.Table<Studio>().OrderBy(studios => studios.Name).ToListAsync().Result;
+            tagTypesRepository = new RepositoryBase<TagType>(connection);
             var tagTypes = connection.Table<TagType>().OrderBy(tagTypes => tagTypes.Name).ToListAsync().Result; 
-            this.Studios = new ObservableCollection<Studio>(studios);
-            this.TagTypes = new Collection<TagType>(tagTypes);
-            var tagTypeViewModels = new Collection<TagTypeViewModel>();
-           
-            foreach (var tagType in this.TagTypes)
+            TagTypes = new Collection<TagType>(tagTypes);
+            foreach (var tagType in TagTypes)
             {
-                tagTypeViewModels.Add(new TagTypeViewModel(tagType));   
+                TagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType)); 
             }
-
-            this.TagTypeViewModels = new ObservableCollection<TagTypeViewModel>(tagTypeViewModels);
-            Console.WriteLine("hi");
-        }
-
-        private void UpdateStaticData(object dataToUpdate)
-        {
-            if (dataToUpdate == null)
-            {
-                return; 
-            }
-            var type = dataToUpdate.GetType(); 
-            if (type == null)
-            {
-                throw new ArgumentNullException();
-            }else if (type == typeof(Studio))
-            {
-                var studio = dataToUpdate as Studio; 
-                this.studioRepository.Update(studio);
-            }
-
-        }
-
-        private void DeleteStaticData(object dataToDelete)
-        {
-            if (dataToDelete == null)
-            {
-                return;
-            }
-            switch (dataToDelete.GetType().Name)
-            {
-                case nameof(Studio):
-                    var studioToDelete = dataToDelete as Studio;
-                    this.studioRepository.Delete(studioToDelete);
-                    this.Studios.Remove(studioToDelete);
-                    break;
-            }
-        }
-
-        private void AddStaticData(object dataToAdd)
-        {
-            switch (dataToAdd.GetType().Name)
-            {
-                case nameof(Studio):
-                    var studioWithInfo = dataToAdd as Studio;
-                    string? studioName = studioWithInfo.Name; 
-                    if (string.IsNullOrWhiteSpace(studioName))
-                    {
-                        return; 
-                    }
-                    var studioToAdd = new Studio(studioName);
-                    this.studioRepository.Create(studioToAdd);
-                    this.Studios.Add(studioToAdd);
-                    break;
-            }
-        }
-
-        private void AddStudio(string studioToAddName)
-        {
-            if (string.IsNullOrWhiteSpace(studioToAddName))
-            {
-                return;
-            }
-            var studioToAdd = new Studio(studioToAddName);
-            this.studioRepository.Create(studioToAdd);
-            this.Studios.Add(studioToAdd);
         }
 
         public void SetResolutionFromFileInfo(string filename)
@@ -426,19 +291,19 @@ namespace FileNameTagger
             switch (resolution)
             {
                 case 2160:
-                    this.SelectedResolution = ResolutionsEnum.UHD; 
+                    SelectedResolution = ResolutionsEnum.UHD; 
                     break;
                 case 1080:
-                    this.SelectedResolution = ResolutionsEnum.FHD;
+                    SelectedResolution = ResolutionsEnum.FHD;
                     break;
                 case 1440:
-                    this.SelectedResolution = ResolutionsEnum.QHD;
+                    SelectedResolution = ResolutionsEnum.QHD;
                     break;
                 case 720:
-                    this.SelectedResolution = ResolutionsEnum.HD;
+                    SelectedResolution = ResolutionsEnum.HD;
                     break;
                 default:
-                    this.SelectedResolution = ResolutionsEnum.SD;
+                    SelectedResolution = ResolutionsEnum.SD;
                     break;
             }
                 
@@ -450,14 +315,14 @@ namespace FileNameTagger
             dialog.FileName = ""; 
             dialog.DefaultExt = ".mp4";
             var data = new List<Studio>();
-            data.AddRange(this.Studios); 
+            //data.AddRange(Studios); 
             bool? result = dialog.ShowDialog();
 
             if (result == true)
             {
                 string filename = dialog.FileName;
 
-                this.loadedFileName = "Hello Mojo"; 
+                loadedFileName = "Hello Mojo"; 
 
                 return filename;
             }
@@ -474,17 +339,17 @@ namespace FileNameTagger
             var filename = SelectFileFromFileExplorer();
             var fileToAdd = new File (filename);
             SetResolutionFromFileInfo(filename);
-            this.LoadedFile = fileToAdd; 
+            LoadedFile = fileToAdd; 
         }
 
         private void OnNewTag()
         {
-            foreach (var studio in Studios)
+            /*foreach (var studio in Studios)
             {
                 studio.IsChecked = false;
-            }
+            }*/
 
-            this.Title = "";
+            Title = "";
         }
 
 /*        void OnSaveTag()
@@ -492,14 +357,14 @@ namespace FileNameTagger
             Tag tagToSave = null; 
             if (releaseDateYearOnly)
             {
-               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, null, releaseYear);
+               tagToSave = new Tag(Actors.Where(x => x.IsChecked), Categories.Where(x => x.IsChecked), Studios.Where(x => x.IsChecked), Title, SelectedResolution, LoadedFile, null, releaseYear);
             }
             else
             {
-               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate, string.Empty);
+               tagToSave = new Tag(Actors.Where(x => x.IsChecked), Categories.Where(x => x.IsChecked), Studios.Where(x => x.IsChecked), Title, SelectedResolution, LoadedFile, ReleaseDate, string.Empty);
             }
-            this.Tag = tagToSave;
-            this.ExportedTag = this.Tag.ExportTagName();
+            Tag = tagToSave;
+            ExportedTag = Tag.ExportTagName();
         }*/
     }
 }

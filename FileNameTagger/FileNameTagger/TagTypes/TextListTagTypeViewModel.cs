@@ -5,23 +5,20 @@ using Repository;
 using Shared;
 using SQLite;
 using System.Collections.ObjectModel;
+using System.Linq;
 
-namespace FileNameTagger
+namespace FileNameTagger.TagTypes
 {
-    public class TagTypeViewModel : BaseViewModel
+    public class TextListTagTypeViewModel : BaseViewModel, ITagTypeViewModel
     {
         private ObservableCollection<Tag> tags;
-        private TagType tagType;
-        private Tag selectedTag; 
+        private Tag selectedTag;
 
         public IRepositoryBase<Tag> TagRepository { get; set; }
 
         public TagType TagType //should be passed in from parent view and doesn't change
                                //the TagTypeTypeId determines what TagTypeView to bind to this viewmodel
-        {
-            get { return tagType; } 
-            set { tagType = value; } 
-        }   
+        { get; private set; }
 
         public ObservableCollection<Tag> Tags
         {
@@ -39,50 +36,57 @@ namespace FileNameTagger
         public RelayCommand<Tag> UpdateTagDataCommand { get; private set; }
         public RelayCommand<Tag> DeleteTagCommand { get; private set; }
 
-        public TagTypeViewModel(TagType tagType)
+        public TextListTagTypeViewModel()
         {
-            this.tagType = tagType;
-            this.AddTagCommand = new RelayCommand<string>(AddTag);
-            this.UpdateTagDataCommand = new RelayCommand<Tag>(UpdateTag);
-            this.DeleteTagCommand = new RelayCommand<Tag>(DeleteTag);
+
+        }
+
+        public TextListTagTypeViewModel(TagType tagType)
+        {
+            TagType = tagType;
+            AddTagCommand = new RelayCommand<string>(AddTag);
+            UpdateTagDataCommand = new RelayCommand<Tag>(UpdateTag);
+            DeleteTagCommand = new RelayCommand<Tag>(DeleteTag);
 
             InitDatabase();
         }
 
-        private void InitDatabase()
+        public void InitDatabase()
         {
             var connection = new SQLiteAsyncConnection(App.databasePath);
             connection.CreateTableAsync<Tag>(); //could probably put this in parent viewmodel
-            this.TagRepository = new RepositoryBase<Tag>(connection);
-            var tags = connection.Table<Tag>().Where(tag => tag.TagTypeId == this.TagType.TagTypeTypeId).OrderBy(tag => tag.Value).ToListAsync().Result;
-            this.Tags = new ObservableCollection<Tag>(tags);
+            TagRepository = new RepositoryBase<Tag>(connection);
+            var tags = connection.Table<Tag>().Where(tag => tag.TagTypeId == TagType.TagTypeTypeId).OrderBy(tag => tag.Value).ToListAsync().Result;
+            Tags = new ObservableCollection<Tag>(tags);
         }
 
-        private void AddTag(string tagName)
+        public void AddTag(string tagName)
         {
             if (string.IsNullOrWhiteSpace(tagName))
                 return;
 
             //if (string.Equals(tagName, )) value in collection of tags
 
-            var tag = new Tag(this.TagType.TagTypeId, tagName);
-            this.TagRepository.Create(tag);
+            var tag = new Tag(TagType.TagTypeId, tagName);
+            TagRepository.Create(tag);
+            Tags.Add(tag);
         }
 
-        private void UpdateTag(Tag tag)
+        public void UpdateTag(Tag tag)
         {
             if (tag == null)
                 return;
 
-            this.TagRepository.Update(tag);
+            TagRepository.Update(tag);
         }
 
-        private void DeleteTag(Tag tag)
+        public void DeleteTag(Tag tag)
         {
             if (tag == null)
                 return;
 
-            this.TagRepository.Delete(tag);
+            TagRepository.Delete(tag);
+            Tags.Remove(tag);
         }
     }
 }

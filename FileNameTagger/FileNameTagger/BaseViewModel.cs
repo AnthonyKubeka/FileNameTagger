@@ -8,24 +8,19 @@ namespace FileNameTagger
 {
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string property = null)
+        protected virtual void SetProperty<T>(ref T member, T val,
+            [CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+            if (object.Equals(member, val)) return;
+            member = val;
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string property = "")
-        {
-            if (EqualityComparer<T>.Default.Equals(storage, value))
-            {
-                return false; 
-            }
-
-            storage = value;
-            this.OnPropertyChanged(property);
-            return true; 
-        }
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         /*Notes:
          * ref - Pass by reference (i.e. modify the address space instead of making a 'copy') i.e. changing b by ref and then using b again will actually have b changed without an assignment

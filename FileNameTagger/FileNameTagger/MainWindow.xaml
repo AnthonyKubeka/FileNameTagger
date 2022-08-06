@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:FileNameTagger"
+        xmlns:tagTypes="clr-namespace:FileNameTagger.TagTypes"
         xmlns:shared="clr-namespace:Shared;assembly=Shared"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
@@ -18,49 +19,6 @@
         >
 
     <Window.Resources>
-        <DataTemplate x:Key="StaticDataItemDataTemplate">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <CheckBox IsChecked="{Binding Path=IsChecked, UpdateSourceTrigger=PropertyChanged}">
-                    <WrapPanel>
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}"/>
-                        <Button Grid.Column="3" 
-                                Command="{Binding DataContext.UpdateStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
-                                CommandParameter="{Binding}"
-                                HorizontalAlignment="Left"
-                                Padding="10,10,10,10"
-                                Margin="5,0,0,0"
-                                >
-                            <materialDesign:PackIcon
-                                        Kind="ContentSave"
-                                        Height="12"
-                                        Padding="0,10,10,0"/>
-                        </Button>
-                        <Button Grid.Column="4" 
-                                Command="{Binding DataContext.DeleteStaticDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
-                                CommandParameter="{Binding}"
-                                HorizontalAlignment="Left"
-                                Padding="10,10,10,10"
-                                Margin="5,0,0,0"
-                                >
-                            <materialDesign:PackIcon
-                                        Kind="TrashCanCircle"
-                                        Height="12"
-                                        Padding="0,10,10,0"/>
-                        </Button>
-                    </WrapPanel>
-                </CheckBox>
-            </Grid>
-        </DataTemplate>
         <!--For data binding the resolution enum-->
         <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
                         ObjectType="{x:Type system:Enum}">
@@ -68,6 +26,12 @@
                 <x:Type TypeName="shared:ResolutionsEnum"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <DataTemplate DataType="{x:Type tagTypes:TextListTagTypeViewModel}">
+            <tagTypes:TextListTagTypeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type tagTypes:TextTagTypeViewModel}">
+            <tagTypes:TextTagTypeView />
+        </DataTemplate>
     </Window.Resources>
     <Window.DataContext>
         <local:MainWindowViewModel/>
@@ -125,51 +89,13 @@
                             ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
                     </Grid>
 
-                    <Expander Header="Studios">
-                        <StackPanel>
-                            <ListBox MaxHeight="150" x:Name="StaticDataListBox" ItemsSource="{Binding Studios}"
-                                         SelectedItem="{Binding SelectedStudio}"
-                             ItemTemplate="{StaticResource StaticDataItemDataTemplate}"
-                             IsSynchronizedWithCurrentItem="True"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="3*"/>
-                                    <ColumnDefinition Width="7*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock
-                            Grid.Column="0"
-                            Text="Add New Studio:"
-                            />
-                                <TextBox Grid.Column="1" AcceptsReturn="False">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding 
-                                         Key="Enter" 
-                                        Command="{Binding AddStudioCommand}"
-                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                            </Grid>
-
-                        </StackPanel>
-                    </Expander>
-                    <ListBox MaxHeight="150" x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
+                    <ListBox x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
+                    
                     <Label>Release Date:</Label>
                     <CheckBox IsChecked="{Binding ReleaseDateYearOnly, UpdateSourceTrigger=PropertyChanged}">Year Only?</CheckBox>
                     <DatePicker Visibility="{Binding DatePickerVisibility}" SelectedDate="{Binding ReleaseDate}" SelectedDateFormat="Short" ></DatePicker>
                     <ComboBox Text="Choose Year" Visibility="{Binding YearComboBoxVisibility}" SelectedItem="{Binding ReleaseYear}">
                         <ComboBoxItem>2010</ComboBoxItem>
-                        <ComboBoxItem>2011</ComboBoxItem>
-                        <ComboBoxItem>2012</ComboBoxItem>
-                        <ComboBoxItem>2013</ComboBoxItem>
-                        <ComboBoxItem>2014</ComboBoxItem>
-                        <ComboBoxItem>2015</ComboBoxItem>
-                        <ComboBoxItem>2016</ComboBoxItem>
-                        <ComboBoxItem>2017</ComboBoxItem>
-                        <ComboBoxItem>2018</ComboBoxItem>
-                        <ComboBoxItem>2019</ComboBoxItem>
-                        <ComboBoxItem>2020</ComboBoxItem>
-                        <ComboBoxItem>2021</ComboBoxItem>
-                        <ComboBoxItem>2022</ComboBoxItem>
                     </ComboBox>
                     <Grid x:Name="ExportedTag">
                         <Grid.ColumnDefinitions>

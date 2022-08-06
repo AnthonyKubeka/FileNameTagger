@@ -3,11 +3,14 @@ using Shared;
 using System;
 using System.Linq;
 using SQLite;
+using System.ComponentModel;
 
 namespace Domain
 {
-    public class Tag
+    public class Tag : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
         [PrimaryKey, AutoIncrement]
         public int TagId { get; set; }
         public int TagTypeId { get; set; }
