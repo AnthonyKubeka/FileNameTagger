@@ -12,9 +12,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock>Boobs</TextBlock>
-        
-        <TextBlock Text="{Binding TagType.Name}" Grid.Column="0"/>
-        <TextBox Text="{Binding FirstTagInTags.Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column ="1" Margin="5" Padding="5"/>
+        <TextBlock Text="{Binding Path=TagType.Name}" Grid.Column="0"/>
+        <TextBox Text="{Binding Tag.Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column ="1" Margin="5" Padding="5"/>
     </Grid>
 </ContentControl>

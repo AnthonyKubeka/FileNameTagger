@@ -11,6 +11,5 @@ namespace FileNameTagger
 {
     public interface ITagTypeViewModel
     {
-        public void InitDatabase();
     }
 }

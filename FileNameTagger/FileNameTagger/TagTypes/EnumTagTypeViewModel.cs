@@ -52,7 +52,7 @@ namespace FileNameTagger.TagTypes
         public void InitDatabase()
         {
             var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Tag>(); //could probably put this in parent viewmodel
+            connection.CreateTableAsync<Tag>();
             this.TagRepository = new RepositoryBase<Tag>(connection);
             var tags = connection.Table<Tag>().Where(tag => tag.TagTypeId == this.TagType.TagTypeTypeId).OrderBy(tag => tag.Value).ToListAsync().Result;
             this.EnumTags = new ObservableCollection<Tag>(tags);

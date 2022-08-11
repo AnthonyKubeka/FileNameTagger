@@ -13,8 +13,6 @@ namespace FileNameTagger.TagTypes
     {
         private Tag tag;
 
-        public IRepositoryBase<Tag> TagRepository { get; set; }
-
         public TagType TagType
 
         { get; private set; }
@@ -31,15 +29,8 @@ namespace FileNameTagger.TagTypes
 
         public TextTagTypeViewModel(TagType tagType)
         {
-            TagType = tagType;
-            InitDatabase();
-        }
-
-        public void InitDatabase()
-        {
-            var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Tag>();
-            TagRepository = new RepositoryBase<Tag>(connection);
+            this.tag = new Tag(tagType.TagTypeId, "");
+            this.TagType = tagType;
         }
     }
 }

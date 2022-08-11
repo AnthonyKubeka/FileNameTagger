@@ -22,10 +22,8 @@ namespace FileNameTagger
         #region Properties
         private File loadedFile;
         private string loadedFileName;
-        private string title;
         private string exportedTag;
         private bool releaseDateYearOnly;
-        private ResolutionsEnum selectedResolution;
         private Tag tag;
         private DateTime releaseDate;
         private string releaseYear;
@@ -40,7 +38,8 @@ namespace FileNameTagger
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
-        public IRepositoryBase<TagType> tagTypesRepository { get; set; }
+        public IRepositoryBase<TagType> TagTypesRepository { get; set; }
+        //public IRepositoryBase<Tag> TagsRepository { get; set; }
         public TagTypeViewModelFactory TagTypeViewModelFactory {get; set;}
     #endregion
 
@@ -151,23 +150,6 @@ namespace FileNameTagger
             }
         }
 
-        public string Title
-        {
-            get
-            {
-                return title;
-            }
-
-            set
-            {
-                if (title != value)
-                {
-                    title = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Title"));
-                }
-            }
-        }
-
         public string LoadedFileName
         {
             get
@@ -226,22 +208,6 @@ namespace FileNameTagger
         }
 
         public Collection<TagType> TagTypes { get; set; }
-        public ResolutionsEnum SelectedResolution
-        {
-            get
-            {
-                return selectedResolution;
-            }
-
-            set
-            {
-                if (selectedResolution != value)
-                {
-                    selectedResolution = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedResolution"));
-                }
-            }
-        }
         #endregion
 
         public MainWindowViewModel()
@@ -256,10 +222,9 @@ namespace FileNameTagger
             #region Componenent and data initialisations
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            initDatabase();
+            InitDatabase();
             ReleaseDate = DateTime.Now; 
             LoadedFile = new File("No File Selected");
-            Title = "";
             exportedTag = "No Tag Created For File";
             ReleaseDateYearOnly = false;
             DatePickerVisibility = Visibility.Visible;
@@ -268,12 +233,13 @@ namespace FileNameTagger
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
         }
 
-        private void initDatabase()
+        private void InitDatabase()
         {
             var connection = new SQLiteAsyncConnection(App.databasePath);
             connection.CreateTableAsync<TagType>();
-
-            tagTypesRepository = new RepositoryBase<TagType>(connection);
+            connection.CreateTableAsync<Tag>();
+            TagTypesRepository = new RepositoryBase<TagType>(connection);
+            //TagsRepository = new RepositoryBase<Tag>(connection);
             var tagTypes = connection.Table<TagType>().OrderBy(tagTypes => tagTypes.Name).ToListAsync().Result; 
             TagTypes = new Collection<TagType>(tagTypes);
             foreach (var tagType in TagTypes)
@@ -282,7 +248,7 @@ namespace FileNameTagger
             }
         }
 
-        public void SetResolutionFromFileInfo(string filename)
+/*        public void SetResolutionFromFileInfo(string filename)
         {
             var ffProbe = new NReco.VideoInfo.FFProbe();
             var videoInfo = ffProbe.GetMediaInfo(filename);
@@ -307,7 +273,7 @@ namespace FileNameTagger
                     break;
             }
                 
-        }
+        }*/
 
         public string SelectFileFromFileExplorer()
         {
@@ -338,18 +304,12 @@ namespace FileNameTagger
             OnNewTag();
             var filename = SelectFileFromFileExplorer();
             var fileToAdd = new File (filename);
-            SetResolutionFromFileInfo(filename);
+           // SetResolutionFromFileInfo(filename);
             LoadedFile = fileToAdd; 
         }
 
         private void OnNewTag()
         {
-            /*foreach (var studio in Studios)
-            {
-                studio.IsChecked = false;
-            }*/
-
-            Title = "";
         }
 
 /*        void OnSaveTag()

@@ -32,6 +32,12 @@
         <DataTemplate DataType="{x:Type tagTypes:TextTagTypeViewModel}">
             <tagTypes:TextTagTypeView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type tagTypes:EnumTagTypeViewModel}">
+            <tagTypes:EnumTagTypeView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type tagTypes:DateTagTypeViewModel}">
+            <tagTypes:DateTagTypeView />
+        </DataTemplate>
     </Window.Resources>
     <Window.DataContext>
         <local:MainWindowViewModel/>
@@ -62,41 +68,9 @@
                         <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
                         <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
                     </StackPanel>
-                    <Grid x:Name="TitleBox">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0">Title:</TextBlock>
-                        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Grid.Column ="1" Margin="5" Padding="5"/>
-                    </Grid>
-                    <Grid x:Name="ResolutionBox">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            Grid.Column="1"
-                            Text="Resolution:"
-                            />
-                        <ComboBox
-                            Grid.Column="3"
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center" 
-                            MinWidth="150" 
-                            SelectedItem="{Binding SelectedResolution}"
-                            ItemsSource="{Binding Source={StaticResource dataFromEnum}}"/>
-                    </Grid>
 
                     <ListBox x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
-                    
-                    <Label>Release Date:</Label>
-                    <CheckBox IsChecked="{Binding ReleaseDateYearOnly, UpdateSourceTrigger=PropertyChanged}">Year Only?</CheckBox>
-                    <DatePicker Visibility="{Binding DatePickerVisibility}" SelectedDate="{Binding ReleaseDate}" SelectedDateFormat="Short" ></DatePicker>
-                    <ComboBox Text="Choose Year" Visibility="{Binding YearComboBoxVisibility}" SelectedItem="{Binding ReleaseYear}">
-                        <ComboBoxItem>2010</ComboBoxItem>
-                    </ComboBox>
+                   
                     <Grid x:Name="ExportedTag">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
