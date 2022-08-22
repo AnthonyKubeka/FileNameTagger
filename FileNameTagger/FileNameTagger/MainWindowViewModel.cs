@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using SQLite.Net;
-
+using Newtonsoft.Json; 
 using System.Windows.Controls;
 using System.Windows.Input;
 using SQLite;
@@ -13,6 +13,7 @@ using Repository;
 using System.Collections.Generic;
 using System.Windows ;
 using System.Diagnostics;
+using System.IO;
 
 namespace FileNameTagger
 {
@@ -20,26 +21,19 @@ namespace FileNameTagger
     public class MainWindowViewModel : BaseViewModel
     {
         #region Properties
-        private File loadedFile;
+        private Domain.File loadedFile;
         private string loadedFileName;
         private string exportedTag;
-        private bool releaseDateYearOnly;
-        private Tag tag;
-        private DateTime releaseDate;
-        private string releaseYear;
         private ObservableCollection<ITagTypeViewModel> tagTypeViewModels;
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
-
         #region Commands
-        public RelayCommand<File> DeleteFileCommand { get; private set; }
-
+        public string ResolutionFromFile { get; set; }
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
+        public RelayCommand ImportTagTemplateCommand { get; private set; }
         public IRepositoryBase<TagType> TagTypesRepository { get; set; }
-        //public IRepositoryBase<Tag> TagsRepository { get; set; }
         public TagTypeViewModelFactory TagTypeViewModelFactory {get; set;}
     #endregion
 
@@ -58,80 +52,6 @@ namespace FileNameTagger
             }
         }
 
-        public string ReleaseYear
-        {
-            get
-            {
-                return releaseYear;
-            }
-
-            set
-            {
-                if (releaseYear != value)
-                {
-                    releaseYear = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseYear"));
-                }
-            }
-        }
-
-        public DateTime ReleaseDate
-        {
-            get
-            {
-                return releaseDate;
-            }
-
-            set
-            {
-                if (releaseDate != value)
-                {
-                    releaseDate = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDate"));
-                }
-            }
-        }
-
-        public bool ReleaseDateYearOnly
-        {
-            get
-            {
-                return releaseDateYearOnly;
-            }
-
-            set
-            {
-                if (releaseDateYearOnly != value)
-                {
-                    releaseDateYearOnly = value;
-                    if (releaseDateYearOnly)
-                    {
-                        DatePickerVisibility = Visibility.Hidden;
-                        YearComboBoxVisibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        DatePickerVisibility = Visibility.Visible;
-                        YearComboBoxVisibility = Visibility.Hidden;
-                    }
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDateYearOnly"));
-                    PropertyChanged(this, new PropertyChangedEventArgs("DatePickerVisibility"));
-                    PropertyChanged(this, new PropertyChangedEventArgs("YearComboBoxVisibility"));
-                }
-            }
-        }
-
-        public Visibility DatePickerVisibility { get; set; }
-        public Visibility YearComboBoxVisibility { get; set; }
-
-
-        public bool ReleaseDateNotYearOnly
-        {
-            get
-            {
-                return !releaseDateYearOnly;
-            }
-        }
 
         public string ExportedTag
         {
@@ -145,7 +65,7 @@ namespace FileNameTagger
                 if (exportedTag != value)
                 {
                     exportedTag = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
+                    SetProperty(ref exportedTag, value);
                 }
             }
         }
@@ -169,11 +89,11 @@ namespace FileNameTagger
                 if (loadedFileName != value)
                 {
                     loadedFileName = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFileName"));
+                    SetProperty(ref loadedFileName, value);
                 }
             }
         }
-        public File LoadedFile
+        public Domain.File LoadedFile
         {
             get
             {
@@ -185,24 +105,7 @@ namespace FileNameTagger
                 if (loadedFile != value)
                 {
                     loadedFile = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFile"));
-                }
-            }
-        }
-
-        public Tag Tag
-        {
-            get
-            {
-                return tag;
-            }
-
-            set
-            {
-                if (tag != value)
-                {
-                    tag = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Tag"));
+                    SetProperty(ref loadedFile, value);
                 }
             }
         }
@@ -215,6 +118,7 @@ namespace FileNameTagger
             
             #region Command Instantiations
             AddFileCommand = new RelayCommand(OnAddFile);
+            ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
            // SaveTagCommand = new RelayCommand(OnSaveTag);
             ClearTagCommand = new RelayCommand(OnNewTag);
             #endregion
@@ -223,12 +127,8 @@ namespace FileNameTagger
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
             InitDatabase();
-            ReleaseDate = DateTime.Now; 
-            LoadedFile = new File("No File Selected");
+            LoadedFile = new Domain.File("No File Selected");
             exportedTag = "No Tag Created For File";
-            ReleaseDateYearOnly = false;
-            DatePickerVisibility = Visibility.Visible;
-            YearComboBoxVisibility = Visibility.Hidden;
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
         }
@@ -239,7 +139,6 @@ namespace FileNameTagger
             connection.CreateTableAsync<TagType>();
             connection.CreateTableAsync<Tag>();
             TagTypesRepository = new RepositoryBase<TagType>(connection);
-            //TagsRepository = new RepositoryBase<Tag>(connection);
             var tagTypes = connection.Table<TagType>().OrderBy(tagTypes => tagTypes.Name).ToListAsync().Result; 
             TagTypes = new Collection<TagType>(tagTypes);
             foreach (var tagType in TagTypes)
@@ -248,40 +147,39 @@ namespace FileNameTagger
             }
         }
 
-/*        public void SetResolutionFromFileInfo(string filename)
+        public void SetResolutionFromFileInfo(string filename)
         {
             var ffProbe = new NReco.VideoInfo.FFProbe();
             var videoInfo = ffProbe.GetMediaInfo(filename);
 
             var resolution = videoInfo.Streams[0].Height;
+
             switch (resolution)
             {
                 case 2160:
-                    SelectedResolution = ResolutionsEnum.UHD; 
+                    ResolutionFromFile = "2160P";
                     break;
                 case 1080:
-                    SelectedResolution = ResolutionsEnum.FHD;
+                    ResolutionFromFile = "1080P";
                     break;
                 case 1440:
-                    SelectedResolution = ResolutionsEnum.QHD;
+                    ResolutionFromFile = "1440P";
                     break;
                 case 720:
-                    SelectedResolution = ResolutionsEnum.HD;
+                    ResolutionFromFile = "720P";
                     break;
                 default:
-                    SelectedResolution = ResolutionsEnum.SD;
+                    ResolutionFromFile = "SD";
                     break;
             }
                 
-        }*/
+        }
 
         public string SelectFileFromFileExplorer()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.FileName = ""; 
             dialog.DefaultExt = ".mp4";
-            var data = new List<Studio>();
-            //data.AddRange(Studios); 
             bool? result = dialog.ShowDialog();
 
             if (result == true)
@@ -303,9 +201,32 @@ namespace FileNameTagger
         {
             OnNewTag();
             var filename = SelectFileFromFileExplorer();
-            var fileToAdd = new File (filename);
-           // SetResolutionFromFileInfo(filename);
+            var fileToAdd = new Domain.File(filename);
+            SetResolutionFromFileInfo(filename);
             LoadedFile = fileToAdd; 
+        }
+
+        private void OnImportTagTemplate()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            var filename = "";
+            dialog.FileName = "";
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                filename = dialog.FileName; 
+            }
+            if (!string.IsNullOrEmpty(filename))
+            {
+                using (StreamReader streamReader = new StreamReader(filename))
+                {
+                    string tagTemplateJson = streamReader.ReadToEnd();
+                    var TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
+                    Console.WriteLine("hi");
+                }
+            }
+            
         }
 
         private void OnNewTag()

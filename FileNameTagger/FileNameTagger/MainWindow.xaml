@@ -19,13 +19,6 @@
         >
 
     <Window.Resources>
-        <!--For data binding the resolution enum-->
-        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
-                        ObjectType="{x:Type system:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="shared:ResolutionsEnum"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
         <DataTemplate DataType="{x:Type tagTypes:TextListTagTypeViewModel}">
             <tagTypes:TextListTagTypeView />
         </DataTemplate>
@@ -53,6 +46,11 @@
                           Command="{Binding ClearTagCommand}"/>
                     <MenuItem Header="_Save Tag"
                           Command="{Binding SaveTagCommand}"/>
+                </MenuItem>
+                <MenuItem Header="_Templates" Style="{StaticResource MenuButtonTheme}" >
+                    <MenuItem Header="_Import Tag Template"
+                          Command ="{Binding ImportTagTemplateCommand}">
+                    </MenuItem>
                 </MenuItem>
             </Menu>
             <Grid x:Name ="ChildViews">
