@@ -5,13 +5,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using SQLite.Net;
-using Newtonsoft.Json; 
+using Newtonsoft.Json;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SQLite;
 using Repository;
 using System.Collections.Generic;
-using System.Windows ;
+using System.Windows;
 using System.Diagnostics;
 using System.IO;
 
@@ -28,18 +28,18 @@ namespace FileNameTagger
         #endregion
 
         #region Commands
-        public string ResolutionFromFile { get; set; }
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand ImportTagTemplateCommand { get; private set; }
-        public IRepositoryBase<TagType> TagTypesRepository { get; set; }
-        public TagTypeViewModelFactory TagTypeViewModelFactory {get; set;}
-    #endregion
+        #endregion
 
-    #region Property Definitions
+        #region Property Definitions
+        public string ResolutionFromFile { get; set; }
+        public TagTypeViewModelFactory TagTypeViewModelFactory { get; set; }
+        public TagTemplate TagTemplate { get; set; }
 
-    public ObservableCollection<ITagTypeViewModel> TagTypeViewModels
+        public ObservableCollection<ITagTypeViewModel> TagTypeViewModels
         {
             get
             {
@@ -60,14 +60,7 @@ namespace FileNameTagger
                 return exportedTag;
             }
 
-            set
-            {
-                if (exportedTag != value)
-                {
-                    exportedTag = value;
-                    SetProperty(ref exportedTag, value);
-                }
-            }
+            set { SetProperty(ref exportedTag, value); }
         }
 
         public string LoadedFileName
@@ -84,15 +77,9 @@ namespace FileNameTagger
                 }
             }
 
-            set
-            {
-                if (loadedFileName != value)
-                {
-                    loadedFileName = value;
-                    SetProperty(ref loadedFileName, value);
-                }
-            }
+            set { SetProperty(ref loadedFileName, value); }
         }
+
         public Domain.File LoadedFile
         {
             get
@@ -110,41 +97,147 @@ namespace FileNameTagger
             }
         }
 
-        public Collection<TagType> TagTypes { get; set; }
+        public List<TagType> TagTypes { get; set; }
+        public List<Tag> Tags { get; set; }
         #endregion
 
         public MainWindowViewModel()
         {
-            
+
             #region Command Instantiations
             AddFileCommand = new RelayCommand(OnAddFile);
             ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
-           // SaveTagCommand = new RelayCommand(OnSaveTag);
+            SaveTagCommand = new RelayCommand(OnSaveTag);
             ClearTagCommand = new RelayCommand(OnNewTag);
             #endregion
 
             #region Componenent and data initialisations
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            InitDatabase();
             LoadedFile = new Domain.File("No File Selected");
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
         }
 
-        private void InitDatabase()
+        void OnSaveTag()
         {
-            var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<TagType>();
-            connection.CreateTableAsync<Tag>();
-            TagTypesRepository = new RepositoryBase<TagType>(connection);
-            var tagTypes = connection.Table<TagType>().OrderBy(tagTypes => tagTypes.Name).ToListAsync().Result; 
-            TagTypes = new Collection<TagType>(tagTypes);
+            var tagTypeViewModels = this.TagTypeViewModels.ToList();
+            var exportedTag = "";
+            var orderedTagTypeViewModels = this.GetOrderedTagTypeViewModels(tagTypeViewModels);
+
+            foreach (var tagTypeViewModel in orderedTagTypeViewModels)
+            {
+                exportedTag += $"{tagTypeViewModel.ToString()}-";
+            }
+            var exportedTagString = exportedTag.Remove(exportedTag.Length - 1, 1);
+            ExportedTag = exportedTagString;
+        }
+
+        public IEnumerable<ITagTypeViewModel> GetOrderedTagTypeViewModels(IEnumerable<ITagTypeViewModel> tagTypeViewModels)
+        {
+            var orderedTagTypeViewModels = new List<ITagTypeViewModel>();
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Text)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.TextList)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Enum)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Date)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            return orderedTagTypeViewModels;
+        }
+
+        private void InitDatabase(IEnumerable<Tag>? tagsFromDisk, IEnumerable<TagType>? tagTypesFromDisk)
+        {
+            App.connection.CreateTableAsync<TagType>();
+            App.connection.CreateTableAsync<Tag>();
+
+
+            if (tagTypesFromDisk != null)
+            {
+                foreach (var tagType in tagTypesFromDisk)
+                {
+                    App.TagTypesRepository.Create(tagType);
+                }
+            }
+
+            if (tagsFromDisk != null)
+            {
+                foreach (var tag in tagsFromDisk)
+                {
+                    App.TagRepository.Create(tag);
+                }
+            }
+
+            TagTypes = App.connection.Table<TagType>().OrderBy(tagTypes => tagTypes.TagTypeTypeId).ToListAsync().Result;
+            var tagTypesToRemove = new List<TagType>();
+
             foreach (var tagType in TagTypes)
             {
-                TagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType)); 
+                if (tagTypesFromDisk.Where(x => x.Name == tagType.Name) == null || !tagTypesFromDisk.Where(x => x.Name == tagType.Name).Any())
+                    tagTypesToRemove.Add(tagType);
             }
+
+            foreach (var tagType in tagTypesToRemove)
+            {
+                TagTypes.Remove(tagType);
+            }
+
+            Tags = App.connection.Table<Tag>().ToListAsync().Result;
+
+            foreach (var tagType in TagTypes)
+            {
+                TagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType, Tags));
+            }
+        }
+
+        private void LoadTagTypesFromTemplate(TagTemplate tagTemplate)
+        {
+            var tagTypes = new List<TagType>();
+            var tags = new List<Tag>();
+            foreach (var tagTemplateTagType in tagTemplate.TagTemplateTagTypes)
+            {
+                var tagType = new TagType(tagTemplateTagType.Name, tagTemplateTagType.TagTypeType);
+                var tagTypeValues = new List<Tag>();
+
+                if (tagTemplateTagType.Values != null)
+                {
+                    tagTypeValues.AddRange(tagTemplateTagType.Values.Select(x => new Tag((int)tagTemplateTagType.TagTypeType, x)));
+                }
+                else
+                {
+                    tagTypeValues.Add(new Tag((int)tagTemplateTagType.TagTypeType, ""));
+                }
+
+                tagTypes.Add(tagType);
+                tags.AddRange(tagTypeValues);
+            }
+            InitDatabase(tags, tagTypes);
         }
 
         public void SetResolutionFromFileInfo(string filename)
@@ -172,27 +265,36 @@ namespace FileNameTagger
                     ResolutionFromFile = "SD";
                     break;
             }
-                
+
         }
 
-        public string SelectFileFromFileExplorer()
+        public string SelectFileFromFileExplorer(FileTypeEnum fileType)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = ""; 
-            dialog.DefaultExt = ".mp4";
+            dialog.FileName = "";
+            switch (fileType)
+            {
+                case FileTypeEnum.Video:
+                    dialog.DefaultExt = ".mp4";
+                    dialog.Filter = "Video files (*.mp4)|*.mkv|All files (*.*)|*.*";
+                    break;
+                case FileTypeEnum.JSON:
+                    dialog.DefaultExt = ".json";
+                    dialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                    break;
+            }
+
             bool? result = dialog.ShowDialog();
 
             if (result == true)
             {
                 string filename = dialog.FileName;
 
-                loadedFileName = "Hello Mojo"; 
-
                 return filename;
             }
             else
             {
-                return "File not found";
+                return String.Empty;
             }
 
         }
@@ -200,52 +302,30 @@ namespace FileNameTagger
         private void OnAddFile()
         {
             OnNewTag();
-            var filename = SelectFileFromFileExplorer();
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.Video);
             var fileToAdd = new Domain.File(filename);
             SetResolutionFromFileInfo(filename);
-            LoadedFile = fileToAdd; 
+            LoadedFile = fileToAdd;
         }
 
         private void OnImportTagTemplate()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-            var filename = "";
-            dialog.FileName = "";
-            bool? result = dialog.ShowDialog();
 
-            if (result == true)
-            {
-                filename = dialog.FileName; 
-            }
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
             if (!string.IsNullOrEmpty(filename))
             {
                 using (StreamReader streamReader = new StreamReader(filename))
                 {
                     string tagTemplateJson = streamReader.ReadToEnd();
-                    var TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
-                    Console.WriteLine("hi");
+                    TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
+                    LoadTagTypesFromTemplate(TagTemplate);
                 }
             }
-            
+
         }
 
         private void OnNewTag()
         {
         }
-
-/*        void OnSaveTag()
-        {
-            Tag tagToSave = null; 
-            if (releaseDateYearOnly)
-            {
-               tagToSave = new Tag(Actors.Where(x => x.IsChecked), Categories.Where(x => x.IsChecked), Studios.Where(x => x.IsChecked), Title, SelectedResolution, LoadedFile, null, releaseYear);
-            }
-            else
-            {
-               tagToSave = new Tag(Actors.Where(x => x.IsChecked), Categories.Where(x => x.IsChecked), Studios.Where(x => x.IsChecked), Title, SelectedResolution, LoadedFile, ReleaseDate, string.Empty);
-            }
-            Tag = tagToSave;
-            ExportedTag = Tag.ExportTagName();
-        }*/
     }
 }

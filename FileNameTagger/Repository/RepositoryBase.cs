@@ -54,7 +54,10 @@ namespace Repository
 
         public async Task<int> Create(T entity)
         {
+            if (databaseConnection.FindAsync<T>(entity) == null)
             return await databaseConnection.InsertAsync(entity);
+
+            return 0; 
         }
 
         public async Task<int> Update(T entity)

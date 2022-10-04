@@ -44,7 +44,7 @@
                     </MenuItem>
                     <MenuItem Header="_New Tag"
                           Command="{Binding ClearTagCommand}"/>
-                    <MenuItem Header="_Save Tag"
+                    <MenuItem Header="_Export Tag"
                           Command="{Binding SaveTagCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Templates" Style="{StaticResource MenuButtonTheme}" >

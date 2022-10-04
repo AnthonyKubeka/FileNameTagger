@@ -11,5 +11,7 @@ namespace FileNameTagger
 {
     public interface ITagTypeViewModel
     {
+        string ToString();
+        int GetTagTypeTypeId();
     }
 }

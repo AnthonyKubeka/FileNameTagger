@@ -32,5 +32,15 @@ namespace FileNameTagger.TagTypes
             this.tag = new Tag(tagType.TagTypeId, "");
             this.TagType = tagType;
         }
+
+        public string ToString()
+        {
+            return this.Tag.Value; 
+        }
+
+        public int GetTagTypeTypeId()
+        {
+            return this.TagType.TagTypeTypeId;
+        }
     }
 }

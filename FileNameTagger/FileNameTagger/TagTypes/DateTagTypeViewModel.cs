@@ -16,7 +16,6 @@ namespace FileNameTagger.TagTypes
         private Tag dateTag;
         private DateTime date;
         private bool yearOnly; 
-        public IRepositoryBase<Tag> TagRepository { get; set; }
 
         public TagType TagType { get; private set; }
 
@@ -45,7 +44,6 @@ namespace FileNameTagger.TagTypes
             {
                 if (yearOnly != value)
                 {
-                    yearOnly = value;
                     if (yearOnly)
                     {
                         DatePickerVisibility = Visibility.Hidden;
@@ -72,17 +70,18 @@ namespace FileNameTagger.TagTypes
             DatePickerVisibility = Visibility.Visible;
             YearComboBoxVisibility = Visibility.Hidden;
             TagType = tagType;
-            InitDatabase();
             DateTag = new Tag(tagType.TagTypeId, DateTime.Now.ToString());
             Date = Convert.ToDateTime(DateTag.Value);
         }
 
-        public void InitDatabase()
+        public string ToString()
         {
-            var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Tag>(); //could probably put this in parent viewmodel
-            TagRepository = new RepositoryBase<Tag>(connection);
-            var tags = connection.Table<Tag>().Where(tag => tag.TagTypeId == TagType.TagTypeTypeId).OrderBy(tag => tag.Value).ToListAsync().Result;
+            return YearOnly ? Date.Year.ToString() : Date.ToShortDateString();
+        }
+
+        public int GetTagTypeTypeId()
+        {
+            return this.TagType.TagTypeTypeId;
         }
     }
 }
