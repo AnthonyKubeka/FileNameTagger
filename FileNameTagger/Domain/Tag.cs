@@ -30,19 +30,5 @@ namespace Domain
             IsChecked = false;
         }
 
-        private string ConvertResolutionEnumToString(ResolutionsEnum resolution)
-        {
-            var resolutionsConversionDictionary = new Dictionary<ResolutionsEnum, string>()
-           {
-               {ResolutionsEnum.SD, "SD" },
-               {ResolutionsEnum.HD, "720p" },
-               {ResolutionsEnum.FHD, "1080p" },
-               {ResolutionsEnum.QHD, "1440p" },
-               {ResolutionsEnum.UHD, "2160p" },
-           };
-
-            return resolutionsConversionDictionary[resolution];
-        }
-
     }
 }

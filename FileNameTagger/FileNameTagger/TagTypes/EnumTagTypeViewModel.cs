@@ -52,8 +52,6 @@ namespace FileNameTagger.TagTypes
             if (string.IsNullOrWhiteSpace(tagName))
                 return;
 
-            //if (string.Equals(tagName, )) value in collection of tags
-
             var tag = new Tag(this.TagType.TagTypeId, tagName);
             App.TagRepository.Create(tag);
             this.EnumTags.Add(tag);

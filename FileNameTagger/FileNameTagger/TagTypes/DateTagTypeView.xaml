@@ -16,7 +16,6 @@
     <CheckBox IsChecked="{Binding YearOnly, UpdateSourceTrigger=PropertyChanged}">Year Only?</CheckBox>
     <!--Make year, month, day checkboxes-->
         <ComboBox Text="Choose Year" Visibility="{Binding YearComboBoxVisibility}">
-            <!--SelectedItem="{Binding ReleaseYear}"-->
             <ComboBoxItem>2010</ComboBoxItem>
         </ComboBox>
     </StackPanel>

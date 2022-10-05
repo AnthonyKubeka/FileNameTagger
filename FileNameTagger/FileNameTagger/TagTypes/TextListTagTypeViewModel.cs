@@ -54,8 +54,6 @@ namespace FileNameTagger.TagTypes
             if (string.IsNullOrWhiteSpace(tagName))
                 return;
 
-            //if (string.Equals(tagName, )) value in collection of tags
-
             var tag = new Tag(TagType.TagTypeId, tagName);
             App.TagRepository.Create(tag);
             Tags.Add(tag);
