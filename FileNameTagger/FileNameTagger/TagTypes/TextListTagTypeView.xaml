@@ -1,0 +1,85 @@
+﻿<ContentControl x:Class="FileNameTagger.TagTypes.TextListTagTypeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FileNameTagger"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Control.Resources>
+        <DataTemplate x:Key ="TextListTagTypeItemDataTemplate">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding Path=IsChecked, UpdateSourceTrigger=PropertyChanged}">
+                    <WrapPanel>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Value}"/>
+                        <Button Grid.Column="3" 
+                                Command="{Binding DataContext.UpdateTagDataCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
+                                CommandParameter="{Binding}"
+                                HorizontalAlignment="Left"
+                                Padding="10,10,10,10"
+                                Margin="5,0,0,0"
+                                >
+                            <materialDesign:PackIcon
+                                        Kind="ContentSave"
+                                        Height="12"
+                                        Padding="0,10,10,0"/>
+                        </Button>
+                        <Button Grid.Column="4" 
+                                Command="{Binding DataContext.DeleteTagCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type ListBox}}}"
+                                CommandParameter="{Binding}"
+                                HorizontalAlignment="Left"
+                                Padding="10,10,10,10"
+                                Margin="5,0,0,0"
+                                >
+                            <materialDesign:PackIcon
+                                        Kind="TrashCanCircle"
+                                        Height="12"
+                                        Padding="0,10,10,0"/>
+                        </Button>
+                    </WrapPanel>
+                </CheckBox>
+            </Grid>
+        </DataTemplate>
+    </Control.Resources>
+    <Expander Header="{Binding TagType.Name}">
+        <StackPanel>
+
+            <ListBox         HorizontalContentAlignment="Stretch"
+                             MaxHeight="150"
+                             ItemsSource="{Binding Tags}"
+                             ItemTemplate="{StaticResource TextListTagTypeItemDataTemplate}"
+                             SelectedItem="{Binding SelectedTag}"
+                             IsSynchronizedWithCurrentItem="True"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="7*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                            Grid.Column="0"
+                            Text="{Binding Path=TagType.Name, StringFormat='Add New {0}:'}" 
+                            />
+                <TextBox Grid.Column="1" AcceptsReturn="False">
+                    <TextBox.InputBindings>
+                        <KeyBinding 
+                                         Key="Enter" 
+                                        Command="{Binding AddTagCommand}"
+                                        CommandParameter="{Binding RelativeSource ={RelativeSource FindAncestor,AncestorType={x:Type TextBox}, AncestorLevel=1}, Path=Text }" />
+                    </TextBox.InputBindings>
+                </TextBox>
+            </Grid>
+        </StackPanel>
+    </Expander>
+
+</ContentControl>

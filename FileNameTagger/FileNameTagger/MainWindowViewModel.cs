@@ -5,203 +5,53 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using SQLite.Net;
-
+using Newtonsoft.Json;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SQLite;
 using Repository;
 using System.Collections.Generic;
-using System.Windows ;
+using System.Windows;
 using System.Diagnostics;
+using System.IO;
 
 namespace FileNameTagger
 {
 
-    public class MainWindowViewModel : INotifyPropertyChanged
+    public class MainWindowViewModel : BaseViewModel
     {
         #region Properties
-        private File loadedFile;
+        private Domain.File loadedFile;
         private string loadedFileName;
-        private string title;
         private string exportedTag;
-        private Studio selectedStudio;
-        private Actor selectedActor;
-        private Category selectedCategory;
-        private string studioToAddName;
-        private bool releaseDateYearOnly;
-        private ObservableCollection<Studio> studios;
-        private ObservableCollection<Actor> actors;
-        private ResolutionsEnum selectedResolution; 
-        private ObservableCollection<Category> categories;
-        private Tag tag;
-        private DateTime releaseDate;
-        private string releaseYear;
+        private ObservableCollection<ITagTypeViewModel> tagTypeViewModels;
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { }; //property change is never null since we assign it an empty anonymous subscriber
-
         #region Commands
-        public RelayCommand<File> DeleteFileCommand { get; private set; }
-
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
-        public RelayCommand<object> AddStaticDataCommand { get; private set; }
-        public RelayCommand<string> AddStudioCommand { get; private set; }
-        public RelayCommand<string> AddCategoryCommand { get; private set; }
-        public RelayCommand<string> AddActorCommand { get; }
-        public RelayCommand<object> UpdateStaticDataCommand { get; private set; }
-        public RelayCommand<object> DeleteStaticDataCommand { get; private set; }
-        public IRepositoryBase<Studio> studioRepository { get; set;  }
-        public IRepositoryBase<Actor> actorRepository { get; set;  }
-        public IRepositoryBase<Category> categoryRepository { get; set;  }
+        public RelayCommand ImportTagTemplateCommand { get; private set; }
         #endregion
 
         #region Property Definitions
+        public string ResolutionFromFile { get; set; }
+        public TagTypeViewModelFactory TagTypeViewModelFactory { get; set; }
+        public TagTemplate TagTemplate { get; set; }
 
-        public string ReleaseYear
+        public ObservableCollection<ITagTypeViewModel> TagTypeViewModels
         {
             get
             {
-                return releaseYear;
+                return tagTypeViewModels;
             }
 
             set
             {
-                if (releaseYear != value)
-                {
-                    releaseYear = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseYear"));
-                }
+                SetProperty(ref tagTypeViewModels, value);
             }
         }
 
-        public DateTime ReleaseDate
-        {
-            get
-            {
-                return releaseDate;
-            }
-
-            set
-            {
-                if (releaseDate != value)
-                {
-                    releaseDate = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDate"));
-                }
-            }
-        }
-
-        public string StudioToAddName
-        {
-            get
-            {
-                return studioToAddName; 
-            }
-
-            set
-            {
-                if (studioToAddName != value)
-                {
-                    studioToAddName = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("StudioToAddName"));
-                }
-            }
-        }
-
-        public bool ReleaseDateYearOnly
-        {
-            get
-            {
-                return releaseDateYearOnly;
-            }
-
-            set
-            {
-                if (releaseDateYearOnly != value)
-                {
-                    releaseDateYearOnly = value;
-                    if (releaseDateYearOnly)
-                    {
-                        DatePickerVisibility = Visibility.Hidden;
-                        YearComboBoxVisibility = Visibility.Visible; 
-                    }
-                    else
-                    {
-                        DatePickerVisibility = Visibility.Visible;
-                        YearComboBoxVisibility = Visibility.Hidden;
-                    }
-                    PropertyChanged(this, new PropertyChangedEventArgs("ReleaseDateYearOnly"));
-                    PropertyChanged(this, new PropertyChangedEventArgs("DatePickerVisibility"));
-                    PropertyChanged(this, new PropertyChangedEventArgs("YearComboBoxVisibility"));
-                }
-            }
-        }
-
-        public Visibility DatePickerVisibility { get; set; }
-        public Visibility YearComboBoxVisibility { get; set; }
-
-
-        public bool ReleaseDateNotYearOnly
-        {
-            get
-            {
-                return !releaseDateYearOnly;
-            }
-        }
-
-
-        public Studio SelectedStudio
-        {
-            get
-            {
-                return selectedStudio;
-            }
-
-            set
-            {
-                if (selectedStudio != value)
-                {
-                    selectedStudio = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedStudio"));
-                }
-            }
-        }
-
-        public Actor SelectedActor
-        {
-            get
-            {
-                return selectedActor;
-            }
-
-            set
-            {
-                if (selectedActor != value)
-                {
-                    selectedActor = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedActor"));
-                }
-            }
-        }
-
-        public Category SelectedCategory
-        {
-            get
-            {
-                return selectedCategory;
-            }
-
-            set
-            {
-                if (selectedCategory != value)
-                {
-                    selectedCategory = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedCategory"));
-                }
-            }
-        }
 
         public string ExportedTag
         {
@@ -210,31 +60,7 @@ namespace FileNameTagger
                 return exportedTag;
             }
 
-            set
-            {
-                if (exportedTag != value)
-                {
-                    exportedTag = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("ExportedTag"));
-                }
-            }
-        }
-
-        public string Title
-        {
-            get
-            {
-                return title;
-            }
-
-            set
-            {
-                if (title != value)
-                {
-                    title = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Title"));
-                }
-            }
+            set { SetProperty(ref exportedTag, value); }
         }
 
         public string LoadedFileName
@@ -251,16 +77,10 @@ namespace FileNameTagger
                 }
             }
 
-            set
-            {
-                if (loadedFileName != value)
-                {
-                    loadedFileName = value; 
-                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFileName"));
-                }
-            }
+            set { SetProperty(ref loadedFileName, value); }
         }
-        public File LoadedFile
+
+        public Domain.File LoadedFile
         {
             get
             {
@@ -272,269 +92,152 @@ namespace FileNameTagger
                 if (loadedFile != value)
                 {
                     loadedFile = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("LoadedFile"));
+                    SetProperty(ref loadedFile, value);
                 }
             }
         }
 
-        public Tag Tag
-        {
-            get
-            {
-                return tag;
-            }
-
-            set
-            {
-                if (tag != value)
-                {
-                    tag = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Tag"));
-                }
-            }
-        }
-        public ObservableCollection<Studio> Studios
-        {
-            get
-            {
-                return studios;
-            }
-
-            set
-            {
-                if (studios != value)
-                {
-                    studios = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Studios"));
-                }
-            }
-        }
-
-        public ObservableCollection<Actor> Actors
-        {
-            get
-            {
-                return actors;
-            }
-
-            set
-            {
-                if (actors != value)
-                {
-                    actors = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Actors"));
-                }
-            }
-        }
-
-        public ObservableCollection<Category> Categories
-        {
-            get
-            {
-                return categories;
-            }
-
-            set
-            {
-                if (categories != value)
-                {
-                    categories = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("Categories"));
-                }
-            }
-        }
-
-        public ResolutionsEnum SelectedResolution
-        {
-            get
-            {
-                return selectedResolution;
-            }
-
-            set
-            {
-                if (selectedResolution != value)
-                {
-                    selectedResolution = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedResolution"));
-                }
-            }
-        }
+        public List<TagType> TagTypes { get; set; }
+        public List<Tag> Tags { get; set; }
         #endregion
 
         public MainWindowViewModel()
         {
-            
 
             #region Command Instantiations
-            this.AddFileCommand = new RelayCommand(OnAddFile);
-            this.SaveTagCommand = new RelayCommand(OnSaveTag);
-            this.ClearTagCommand = new RelayCommand(OnNewTag); 
-            this.UpdateStaticDataCommand = new RelayCommand<object>(UpdateStaticData);
-            this.DeleteStaticDataCommand = new RelayCommand<object>(DeleteStaticData);
-            this.AddStaticDataCommand = new RelayCommand<object>(AddStaticData);
-            this.AddStudioCommand = new RelayCommand<string>(AddStudio);
-            this.AddCategoryCommand = new RelayCommand<string>(AddCategory);
-            this.AddActorCommand = new RelayCommand<string>(AddActor);
+            AddFileCommand = new RelayCommand(OnAddFile);
+            ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
+            SaveTagCommand = new RelayCommand(OnSaveTag);
+            ClearTagCommand = new RelayCommand(OnNewTag);
             #endregion
+
             #region Componenent and data initialisations
-            initDatabase();
-            ReleaseDate = DateTime.Now; 
-            this.LoadedFile = new File("No File Selected");
-            this.Title = "";
-            this.Tag = new Tag(this.LoadedFile);
-            this.exportedTag = "No Tag Created For File";
-            this.ReleaseDateYearOnly = false;
-            DatePickerVisibility = Visibility.Visible;
-            YearComboBoxVisibility = Visibility.Hidden;
+            TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
+            TagTypeViewModelFactory = new TagTypeViewModelFactory();
+            LoadedFile = new Domain.File("No File Selected");
+            exportedTag = "No Tag Created For File";
             #endregion
+            TagTypeViewModelFactory = new TagTypeViewModelFactory();
         }
 
-        private void initDatabase()
+        void OnSaveTag()
         {
-            var connection = new SQLiteAsyncConnection(App.databasePath);
-            connection.CreateTableAsync<Actor>();
-            connection.CreateTableAsync<Studio>();
-            connection.CreateTableAsync<Category>();
+            var tagTypeViewModels = this.TagTypeViewModels.ToList();
+            var exportedTag = "";
+            var orderedTagTypeViewModels = this.GetOrderedTagTypeViewModels(tagTypeViewModels);
 
-            this.studioRepository = new RepositoryBase<Studio>(connection);
-            this.actorRepository = new RepositoryBase<Actor>(connection);
-            this.categoryRepository = new RepositoryBase<Category>(connection);
-
-            var actors = connection.Table<Actor>().OrderBy(actors => actors.Name).ToListAsync().Result;
-            var categories = connection.Table<Category>().OrderBy(categories => categories.Name).ToListAsync().Result;
-            var studios = connection.Table<Studio>().OrderBy(studios => studios.Name).ToListAsync().Result;
-           
-            this.Actors = new ObservableCollection<Actor>(actors);
-            this.Categories = new ObservableCollection<Category>(categories);
-            this.Studios = new ObservableCollection<Studio>(studios);
-
+            foreach (var tagTypeViewModel in orderedTagTypeViewModels)
+            {
+                exportedTag += $"{tagTypeViewModel.ToString()}-";
+            }
+            var exportedTagString = exportedTag.Remove(exportedTag.Length - 1, 1);
+            ExportedTag = exportedTagString;
         }
 
-        private void UpdateStaticData(object dataToUpdate)
+        public IEnumerable<ITagTypeViewModel> GetOrderedTagTypeViewModels(IEnumerable<ITagTypeViewModel> tagTypeViewModels)
         {
-            if (dataToUpdate == null)
+            var orderedTagTypeViewModels = new List<ITagTypeViewModel>();
+            foreach (var tagTypeViewModel in tagTypeViewModels)
             {
-                return; 
-            }
-            var type = dataToUpdate.GetType(); 
-            if (type == null)
-            {
-                throw new ArgumentNullException();
-            }else if (type == typeof(Studio))
-            {
-                var studio = dataToUpdate as Studio; 
-                this.studioRepository.Update(studio);
-                //var studioToUpdate = this.studios.Where(x => x.StudioId == studio.StudioId).FirstOrDefault();
-            }else if (type == typeof(Actor))
-            {
-                var actor = dataToUpdate as Actor;
-                this.actorRepository.Update(actor); 
-            }else if (type == typeof(Category))
-            {
-                var category = dataToUpdate as Category;
-                this.categoryRepository.Update(category);
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Text)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
             }
 
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.TextList)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Enum)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            foreach (var tagTypeViewModel in tagTypeViewModels)
+            {
+                if (tagTypeViewModel.GetTagTypeTypeId() == (int)TagTypeTypeEnum.Date)
+                {
+                    orderedTagTypeViewModels.Add(tagTypeViewModel);
+                }
+            }
+
+            return orderedTagTypeViewModels;
         }
 
-        private void DeleteStaticData(object dataToDelete)
+        private void InitDatabase(IEnumerable<Tag>? tagsFromDisk, IEnumerable<TagType>? tagTypesFromDisk)
         {
-            if (dataToDelete == null)
-            {
-                return;
-            }
-            switch (dataToDelete.GetType().Name)
-            {
-                case nameof(Studio):
-                    var studioToDelete = dataToDelete as Studio;
-                    this.studioRepository.Delete(studioToDelete);
-                    this.Studios.Remove(studioToDelete);
-                    break;
-                case nameof(Actor):
-                    var actorToDelete = dataToDelete as Actor;
-                    this.actorRepository.Delete(actorToDelete);
-                    this.Actors.Remove(actorToDelete);
-                    break;
-                case nameof(Category):
-                    var categoryToDelete = dataToDelete as Category;
-                    this.categoryRepository.Delete(categoryToDelete);
-                    this.Categories.Remove(categoryToDelete);
-                    break;
-            }
-        }
+            App.connection.CreateTableAsync<TagType>();
+            App.connection.CreateTableAsync<Tag>();
 
-        private void AddStaticData(object dataToAdd)
-        {
-            switch (dataToAdd.GetType().Name)
+
+            if (tagTypesFromDisk != null)
             {
-                case nameof(Studio):
-                    var studioWithInfo = dataToAdd as Studio;
-                    string? studioName = studioWithInfo.Name; 
-                    if (string.IsNullOrWhiteSpace(studioName))
-                    {
-                        return; 
-                    }
-                    var studioToAdd = new Studio(studioName);
-                    this.studioRepository.Create(studioToAdd);
-                    this.Studios.Add(studioToAdd);
-                    break;
-                case nameof(Actor):
-                    var actorWithInfo = dataToAdd as Actor;
-                    string? actorName = actorWithInfo.Name;
-                    if (string.IsNullOrWhiteSpace(actorName))
-                    {
-                        return;
-                    }
-                    var actorToAdd = new Actor(actorName);
-                    this.actorRepository.Create(actorToAdd);
-                    this.Actors.Add(actorToAdd);
-                    break;
-                case nameof(Category):
-                    var categoryWithInfo = dataToAdd as Category;
-                    string? categoryName = categoryWithInfo.Name;
-                    if (string.IsNullOrWhiteSpace(categoryName))
-                    {
-                        return;
-                    }
-                    var categoryToAdd = new Category(categoryName);
-                    this.categoryRepository.Create(categoryToAdd);
-                    this.Categories.Add(categoryToAdd);
-                    break;
+                foreach (var tagType in tagTypesFromDisk)
+                {
+                    App.TagTypesRepository.Create(tagType);
+                }
+            }
+
+            if (tagsFromDisk != null)
+            {
+                foreach (var tag in tagsFromDisk)
+                {
+                    App.TagRepository.Create(tag);
+                }
+            }
+
+            TagTypes = App.connection.Table<TagType>().OrderBy(tagTypes => tagTypes.TagTypeTypeId).ToListAsync().Result;
+            var tagTypesToRemove = new List<TagType>();
+
+            foreach (var tagType in TagTypes)
+            {
+                if (tagTypesFromDisk.Where(x => x.Name == tagType.Name) == null || !tagTypesFromDisk.Where(x => x.Name == tagType.Name).Any())
+                    tagTypesToRemove.Add(tagType);
+            }
+
+            foreach (var tagType in tagTypesToRemove)
+            {
+                TagTypes.Remove(tagType);
+            }
+
+            Tags = App.connection.Table<Tag>().ToListAsync().Result;
+
+            foreach (var tagType in TagTypes)
+            {
+                TagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType, Tags));
             }
         }
 
-        private void AddCategory(string categoryToAddName)
+        private void LoadTagTypesFromTemplate(TagTemplate tagTemplate)
         {
-            if (string.IsNullOrWhiteSpace(categoryToAddName))
+            var tagTypes = new List<TagType>();
+            var tags = new List<Tag>();
+            foreach (var tagTemplateTagType in tagTemplate.TagTemplateTagTypes)
             {
-                return;
-            }
-            var categoryToAdd = new Category(categoryToAddName);
-            this.categoryRepository.Create(categoryToAdd);
-            this.Categories.Add(categoryToAdd);        
-        }
+                var tagType = new TagType(tagTemplateTagType.Name, tagTemplateTagType.TagTypeType);
+                var tagTypeValues = new List<Tag>();
 
-        private void AddActor(string actorToAddName)
-        {
-            if (string.IsNullOrWhiteSpace(actorToAddName))
-            {
-                return;
-            }
-            var actorToAdd = new Actor(actorToAddName);
-            this.actorRepository.Create(actorToAdd);
-            this.Actors.Add(actorToAdd);
-        }
+                if (tagTemplateTagType.Values != null)
+                {
+                    tagTypeValues.AddRange(tagTemplateTagType.Values.Select(x => new Tag((int)tagTemplateTagType.TagTypeType, x)));
+                }
+                else
+                {
+                    tagTypeValues.Add(new Tag((int)tagTemplateTagType.TagTypeType, ""));
+                }
 
-        private void AddStudio(string studioToAddName)
-        {
-            if (string.IsNullOrWhiteSpace(studioToAddName))
-            {
-                return;
+                tagTypes.Add(tagType);
+                tags.AddRange(tagTypeValues);
             }
-            var studioToAdd = new Studio(studioToAddName);
-            this.studioRepository.Create(studioToAdd);
-            this.Studios.Add(studioToAdd);
+            InitDatabase(tags, tagTypes);
         }
 
         public void SetResolutionFromFileInfo(string filename)
@@ -543,47 +246,55 @@ namespace FileNameTagger
             var videoInfo = ffProbe.GetMediaInfo(filename);
 
             var resolution = videoInfo.Streams[0].Height;
+
             switch (resolution)
             {
                 case 2160:
-                    this.SelectedResolution = ResolutionsEnum.UHD; 
+                    ResolutionFromFile = "2160P";
                     break;
                 case 1080:
-                    this.SelectedResolution = ResolutionsEnum.FHD;
+                    ResolutionFromFile = "1080P";
                     break;
                 case 1440:
-                    this.SelectedResolution = ResolutionsEnum.QHD;
+                    ResolutionFromFile = "1440P";
                     break;
                 case 720:
-                    this.SelectedResolution = ResolutionsEnum.HD;
+                    ResolutionFromFile = "720P";
                     break;
                 default:
-                    this.SelectedResolution = ResolutionsEnum.SD;
+                    ResolutionFromFile = "SD";
                     break;
             }
-                
+
         }
 
-        public string SelectFileFromFileExplorer()
+        public string SelectFileFromFileExplorer(FileTypeEnum fileType)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = ""; 
-            dialog.DefaultExt = ".mp4";
-            var data = new List<Studio>();
-            data.AddRange(this.Studios); 
+            dialog.FileName = "";
+            switch (fileType)
+            {
+                case FileTypeEnum.Video:
+                    dialog.DefaultExt = ".mp4";
+                    dialog.Filter = "Video files (*.mp4)|*.mkv|All files (*.*)|*.*";
+                    break;
+                case FileTypeEnum.JSON:
+                    dialog.DefaultExt = ".json";
+                    dialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                    break;
+            }
+
             bool? result = dialog.ShowDialog();
 
             if (result == true)
             {
                 string filename = dialog.FileName;
 
-                this.loadedFileName = "Hello Mojo"; 
-
                 return filename;
             }
             else
             {
-                return "File not found";
+                return String.Empty;
             }
 
         }
@@ -591,43 +302,30 @@ namespace FileNameTagger
         private void OnAddFile()
         {
             OnNewTag();
-            var filename = SelectFileFromFileExplorer();
-            var fileToAdd = new File (filename);
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.Video);
+            var fileToAdd = new Domain.File(filename);
             SetResolutionFromFileInfo(filename);
-            this.LoadedFile = fileToAdd; 
+            LoadedFile = fileToAdd;
+        }
+
+        private void OnImportTagTemplate()
+        {
+
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
+            if (!string.IsNullOrEmpty(filename))
+            {
+                using (StreamReader streamReader = new StreamReader(filename))
+                {
+                    string tagTemplateJson = streamReader.ReadToEnd();
+                    TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
+                    LoadTagTypesFromTemplate(TagTemplate);
+                }
+            }
+
         }
 
         private void OnNewTag()
         {
-            foreach(var actor in Actors)
-            {
-                actor.IsChecked = false;
-            }
-            foreach (var studio in Studios)
-            {
-                studio.IsChecked = false;
-            }
-            foreach (var category in Categories)
-            {
-                category.IsChecked = false;
-            }
-
-            this.Title = "";
-        }
-
-        void OnSaveTag()
-        {
-            Tag tagToSave = null; 
-            if (releaseDateYearOnly)
-            {
-               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, null, releaseYear);
-            }
-            else
-            {
-               tagToSave = new Tag(this.Actors.Where(x => x.IsChecked), this.Categories.Where(x => x.IsChecked), this.Studios.Where(x => x.IsChecked), this.Title, this.SelectedResolution, this.LoadedFile, this.ReleaseDate, string.Empty);
-            }
-            this.Tag = tagToSave;
-            this.ExportedTag = this.Tag.ExportTagName();
         }
     }
 }
