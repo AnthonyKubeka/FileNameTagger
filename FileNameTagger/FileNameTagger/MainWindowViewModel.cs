@@ -97,8 +97,10 @@ namespace FileNameTagger
             }
         }
 
-        public List<TagType> TagTypes { get; set; }
-        public List<Tag> Tags { get; set; }
+        public List<TagType> TagTypesInDb { get; set; }
+        public List<Tag> TagsInDb { get; set; }
+        public List<TagType> TagTypesInMemory { get; set; }
+        public List<Tag> TagsInMemory { get; set; }
         #endregion
 
         public MainWindowViewModel()
@@ -118,6 +120,8 @@ namespace FileNameTagger
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
+            TagTypesInMemory = new List<TagType>();
+            TagsInMemory = new List<Tag>();
         }
 
         void OnSaveTag()
@@ -172,72 +176,70 @@ namespace FileNameTagger
             return orderedTagTypeViewModels;
         }
 
-        private void InitDatabase(IEnumerable<Tag>? tagsFromDisk, IEnumerable<TagType>? tagTypesFromDisk)
+        private void InitDatabase()
         {
             App.connection.CreateTableAsync<TagType>();
             App.connection.CreateTableAsync<Tag>();
-
-
-            if (tagTypesFromDisk != null)
-            {
-                foreach (var tagType in tagTypesFromDisk)
-                {
-                    App.TagTypesRepository.Create(tagType);
-                }
-            }
-
-            if (tagsFromDisk != null)
-            {
-                foreach (var tag in tagsFromDisk)
-                {
-                    App.TagRepository.Create(tag);
-                }
-            }
-
-            TagTypes = App.connection.Table<TagType>().OrderBy(tagTypes => tagTypes.TagTypeTypeId).ToListAsync().Result;
-            var tagTypesToRemove = new List<TagType>();
-
-            foreach (var tagType in TagTypes)
-            {
-                if (tagTypesFromDisk.Where(x => x.Name == tagType.Name) == null || !tagTypesFromDisk.Where(x => x.Name == tagType.Name).Any())
-                    tagTypesToRemove.Add(tagType);
-            }
-
-            foreach (var tagType in tagTypesToRemove)
-            {
-                TagTypes.Remove(tagType);
-            }
-
-            Tags = App.connection.Table<Tag>().ToListAsync().Result;
-
-            foreach (var tagType in TagTypes)
-            {
-                TagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType, Tags));
-            }
+            TagTypesInDb = App.connection.Table<TagType>().OrderBy(tagTypes => tagTypes.TagTypeTypeId).ToListAsync().Result;
+            TagsInDb = App.connection.Table<Tag>().ToListAsync().Result;
         }
 
-        private void LoadTagTypesFromTemplate(TagTemplate tagTemplate)
+        private void SetTagAndTagTypeFromTagTemplateFromDisk(TagTemplate tagTemplate)
         {
+            InitDatabase();
             var tagTypes = new List<TagType>();
-            var tags = new List<Tag>();
+            var tagsForTagType = new List<Tag>();
             foreach (var tagTemplateTagType in tagTemplate.TagTemplateTagTypes)
             {
                 var tagType = new TagType(tagTemplateTagType.Name, tagTemplateTagType.TagTypeType);
-                var tagTypeValues = new List<Tag>();
-
-                if (tagTemplateTagType.Values != null)
+                var isTagTypeInDb = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).Any();
+                if (!isTagTypeInDb)
                 {
-                    tagTypeValues.AddRange(tagTemplateTagType.Values.Select(x => new Tag((int)tagTemplateTagType.TagTypeType, x)));
-                }
-                else
-                {
-                    tagTypeValues.Add(new Tag((int)tagTemplateTagType.TagTypeType, ""));
+                    App.TagTypesRepository.Create(tagType);
+                    InitDatabase();
                 }
 
                 tagTypes.Add(tagType);
-                tags.AddRange(tagTypeValues);
+
+                if (tagTemplateTagType.Values != null) //enforce business rule that a tag type must have a value to be 'loaded'
+                {
+                    foreach(var value in tagTemplateTagType.Values)
+                    {
+                        var matchingTagType = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).First();
+                        var tag = new Tag(matchingTagType.TagTypeId, value);
+                        var isTagInDb = TagsInDb.Where(x => x.Value == tag.Value && x.TagTypeId == tag.TagTypeId).Any();
+                        if (!isTagInDb)
+                        {
+                            App.TagRepository.Create(tag);
+                            InitDatabase();
+                        }
+                    }
+                }
             }
-            InitDatabase(tags, tagTypes);
+            foreach (var tagType in tagTypes)
+            {
+                var matchingTagTypeInDb = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).FirstOrDefault(); 
+                if (matchingTagTypeInDb != null)
+                {
+                    TagTypesInMemory.Add(matchingTagTypeInDb);
+                }
+            } 
+        }
+
+        private void LoadTagTypeViewModels()
+        {
+            var unorderedTagTypeViewModels = new List<ITagTypeViewModel>();
+            foreach (var tagType in TagTypesInMemory)
+            {
+                unorderedTagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType, TagsInDb));
+            }
+            TagsInMemory = TagsInDb;
+            var orderedTagTypeViewModels = GetOrderedTagTypeViewModels(unorderedTagTypeViewModels);
+            
+            foreach (var tagTypeViewModel in orderedTagTypeViewModels)
+            {
+                TagTypeViewModels.Add(tagTypeViewModel);
+            }    
         }
 
         public void SetResolutionFromFileInfo(string filename)
@@ -318,8 +320,10 @@ namespace FileNameTagger
                 {
                     string tagTemplateJson = streamReader.ReadToEnd();
                     TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
-                    LoadTagTypesFromTemplate(TagTemplate);
+                    SetTagAndTagTypeFromTagTemplateFromDisk(TagTemplate);
                 }
+
+                LoadTagTypeViewModels();
             }
 
         }

@@ -9,7 +9,7 @@
         xmlns:shared="clr-namespace:Shared;assembly=Shared"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Height="600" Width="920" 
+        Height="600" Width="1080" 
         ResizeMode="CanResizeWithGrip"
         Background="Transparent"
         ShowInTaskbar="True"
@@ -36,8 +36,15 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Border Background="RoyalBlue">
-       <StackPanel>
-            <Menu Margin="0,0,0,20">
+            <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Menu Grid.Row="0" Grid.Column="0">
                 <MenuItem Header="_File" Style="{StaticResource MenuButtonTheme}" >
                     <MenuItem Header="_Load File"
                           Command ="{Binding AddFileCommand}">
@@ -53,32 +60,32 @@
                     </MenuItem>
                 </MenuItem>
             </Menu>
-            <Grid x:Name ="ChildViews">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
-                        <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
-                    </StackPanel>
-
-                    <ListBox x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
-                   
-                    <Grid x:Name="ExportedTag">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
-                        <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
-                    </Grid>
-                </StackPanel>
+             
+            <Grid Grid.Row ="1" x:Name ="ChildViews">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                            <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
+                            <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
+                        </StackPanel>
+                <ListView x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
+                <Grid Grid.Row="2" x:Name="ExportedTag">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
+                            <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
+                        </Grid>
+                </Grid>
+            
             </Grid>
-        </StackPanel>
     </Border>
 </Window>
