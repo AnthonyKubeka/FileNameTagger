@@ -85,7 +85,11 @@ namespace FileNameTagger.TagTypes
                 result += $"{tag.Value}-";
             }
 
-            var tagString = result.Remove(result.Length - 1, 1);
+            var tagString = "";
+            if (result.Length > 0)
+            {
+               tagString = result.Remove(result.Length - 1, 1);
+            }
 
             return tagString; 
         }

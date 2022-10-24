@@ -76,7 +76,7 @@ namespace FileNameTagger.TagTypes
 
         public string ToString()
         {
-            return SelectedEnumTag.Value != null ? SelectedEnumTag.Value : "" ; 
+            return SelectedEnumTag != null ? SelectedEnumTag.Value : "" ; 
         }
 
         public int GetTagTypeTypeId()
