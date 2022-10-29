@@ -2,7 +2,6 @@
 using Shared;
 using System;
 using System.Linq;
-using SQLite;
 using System.ComponentModel;
 
 namespace Domain
@@ -11,21 +10,13 @@ namespace Domain
     {
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        [PrimaryKey, AutoIncrement]
-        public int TagId { get; set; }
-        public int TagTypeId { get; set; }
+        public string TagTypeName { get; set; }
         public string Value { get; set; }
-        [Ignore]
         public bool IsChecked { get; set; }
 
-        public Tag()
+        public Tag(string tagTypeName, string value)
         {
-
-        }
-
-        public Tag(int tagTypeId, string value)
-        {
-            TagTypeId = tagTypeId; 
+            TagTypeName = tagTypeName; 
             Value = value;
             IsChecked = false;
         }

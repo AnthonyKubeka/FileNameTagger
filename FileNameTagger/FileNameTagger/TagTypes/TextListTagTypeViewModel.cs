@@ -54,8 +54,7 @@ namespace FileNameTagger.TagTypes
             if (string.IsNullOrWhiteSpace(tagName))
                 return;
 
-            var tag = new Tag(TagType.TagTypeId, tagName);
-            App.TagRepository.Create(tag);
+            var tag = new Tag(TagType.Name, tagName);
             Tags.Add(tag);
         }
 
@@ -63,16 +62,12 @@ namespace FileNameTagger.TagTypes
         {
             if (tag == null)
                 return;
-
-            App.TagRepository.Update(tag);
         }
 
         public void DeleteTag(Tag tag)
         {
             if (tag == null)
                 return;
-
-            App.TagRepository.Delete(tag);
             Tags.Remove(tag);
         }
 
