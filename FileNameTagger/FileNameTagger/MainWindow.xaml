@@ -36,9 +36,11 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Border Background="RoyalBlue">
-            <Grid>
+          <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -58,34 +60,24 @@
                     <MenuItem Header="_Import Tag Template"
                           Command ="{Binding ImportTagTemplateCommand}">
                     </MenuItem>
+                    <MenuItem Header="_Export Tag Template"
+                          Command ="{Binding ExportTagTemplateCommand}">
+                    </MenuItem>
                 </MenuItem>
             </Menu>
-             
-            <Grid Grid.Row ="1" x:Name ="ChildViews">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
                             <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
                             <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
-                        </StackPanel>
-                <ListView x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
-                <Grid Grid.Row="2" x:Name="ExportedTag">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
-                            <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
-                        </Grid>
+            </StackPanel>
+                <ListView Grid.Row ="2" x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
+                <Grid Grid.Row="3" x:Name="ExportedTag">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
+                    <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
                 </Grid>
-            
             </Grid>
     </Border>
 </Window>

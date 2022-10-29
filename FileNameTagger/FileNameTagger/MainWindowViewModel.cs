@@ -8,7 +8,6 @@ using SQLite.Net;
 using Newtonsoft.Json;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SQLite;
 using Repository;
 using System.Collections.Generic;
 using System.Windows;
@@ -32,12 +31,14 @@ namespace FileNameTagger
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand ImportTagTemplateCommand { get; private set; }
+        public RelayCommand ExportTagTemplateCommand { get; private set; }
         #endregion
 
         #region Property Definitions
         public string ResolutionFromFile { get; set; }
         public TagTypeViewModelFactory TagTypeViewModelFactory { get; set; }
         public TagTemplate TagTemplate { get; set; }
+        public List<TagType> TagTypes { get; set; }
 
         public ObservableCollection<ITagTypeViewModel> TagTypeViewModels
         {
@@ -96,11 +97,6 @@ namespace FileNameTagger
                 }
             }
         }
-
-        public List<TagType> TagTypesInDb { get; set; }
-        public List<Tag> TagsInDb { get; set; }
-        public List<TagType> TagTypesInMemory { get; set; }
-        public List<Tag> TagsInMemory { get; set; }
         #endregion
 
         public MainWindowViewModel()
@@ -109,6 +105,7 @@ namespace FileNameTagger
             #region Command Instantiations
             AddFileCommand = new RelayCommand(OnAddFile);
             ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
+            ExportTagTemplateCommand = new RelayCommand(OnExportTagTemplate);
             SaveTagCommand = new RelayCommand(OnSaveTag);
             ClearTagCommand = new RelayCommand(OnNewTag);
             #endregion
@@ -120,8 +117,7 @@ namespace FileNameTagger
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            TagTypesInMemory = new List<TagType>();
-            TagsInMemory = new List<Tag>();
+            TagTypes = new List<TagType>();
         }
 
         void OnSaveTag()
@@ -176,64 +172,39 @@ namespace FileNameTagger
             return orderedTagTypeViewModels;
         }
 
-        private void InitDatabase()
-        {
-            App.connection.CreateTableAsync<TagType>();
-            App.connection.CreateTableAsync<Tag>();
-            TagTypesInDb = App.connection.Table<TagType>().OrderBy(tagTypes => tagTypes.TagTypeTypeId).ToListAsync().Result;
-            TagsInDb = App.connection.Table<Tag>().ToListAsync().Result;
-        }
-
         private void SetTagAndTagTypeFromTagTemplateFromDisk(TagTemplate tagTemplate)
         {
-            InitDatabase();
-            var tagTypes = new List<TagType>();
-            var tagsForTagType = new List<Tag>();
+            //treat each load of a tag template as fresh
+            if (tagTemplate == null || tagTemplate.TagTemplateTagTypes == null || tagTemplate.TagTemplateTagTypes.Count == 0)
+            {
+                return;
+            }
+            TagTypes.Clear();
+
             foreach (var tagTemplateTagType in tagTemplate.TagTemplateTagTypes)
             {
-                var tagType = new TagType(tagTemplateTagType.Name, tagTemplateTagType.TagTypeType);
-                var isTagTypeInDb = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).Any();
-                if (!isTagTypeInDb)
+               
+                if (tagTemplateTagType.Values != null && tagTemplateTagType.Values.Any()) //enforce business rule that a tag type must have a value to be 'loaded'
                 {
-                    App.TagTypesRepository.Create(tagType);
-                    InitDatabase();
-                }
-
-                tagTypes.Add(tagType);
-
-                if (tagTemplateTagType.Values != null) //enforce business rule that a tag type must have a value to be 'loaded'
-                {
+                    var tags = new List<Tag>();
                     foreach(var value in tagTemplateTagType.Values)
                     {
-                        var matchingTagType = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).First();
-                        var tag = new Tag(matchingTagType.TagTypeId, value);
-                        var isTagInDb = TagsInDb.Where(x => x.Value == tag.Value && x.TagTypeId == tag.TagTypeId).Any();
-                        if (!isTagInDb)
-                        {
-                            App.TagRepository.Create(tag);
-                            InitDatabase();
-                        }
+                        var tag = new Tag(tagTemplateTagType.Name, value);
+                        tags.Add(tag);
                     }
+                    var tagType = new TagType(tagTemplateTagType.Name, tagTemplateTagType.TagTypeType, tags);
+                    TagTypes.Add(tagType);
                 }
             }
-            foreach (var tagType in tagTypes)
-            {
-                var matchingTagTypeInDb = TagTypesInDb.Where(x => x.Name == tagType.Name && x.TagTypeTypeId == tagType.TagTypeTypeId).FirstOrDefault(); 
-                if (matchingTagTypeInDb != null)
-                {
-                    TagTypesInMemory.Add(matchingTagTypeInDb);
-                }
-            } 
         }
 
         private void LoadTagTypeViewModels()
         {
             var unorderedTagTypeViewModels = new List<ITagTypeViewModel>();
-            foreach (var tagType in TagTypesInMemory)
+            foreach (var tagType in TagTypes)
             {
-                unorderedTagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType, TagsInDb));
+                unorderedTagTypeViewModels.Add(TagTypeViewModelFactory.GetTagTypeViewModel(tagType));
             }
-            TagsInMemory = TagsInDb;
             var orderedTagTypeViewModels = GetOrderedTagTypeViewModels(unorderedTagTypeViewModels);
             
             foreach (var tagTypeViewModel in orderedTagTypeViewModels)
@@ -311,6 +282,24 @@ namespace FileNameTagger
         }
 
         private void OnImportTagTemplate()
+        {
+
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
+            if (!string.IsNullOrEmpty(filename))
+            {
+                using (StreamReader streamReader = new StreamReader(filename))
+                {
+                    string tagTemplateJson = streamReader.ReadToEnd();
+                    TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
+                    SetTagAndTagTypeFromTagTemplateFromDisk(TagTemplate);
+                }
+
+                LoadTagTypeViewModels();
+            }
+
+        }
+
+        private void OnExportTagTemplate()
         {
 
             var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);

@@ -1,5 +1,4 @@
 ﻿using Shared;
-using SQLite;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,20 +10,15 @@ namespace Domain
 {
     public class TagType
     {
-        [PrimaryKey, AutoIncrement]
-        public int TagTypeId { get; set; }
         public string Name { get; set; }
         public int TagTypeTypeId { get; set; }
+        public IEnumerable<Tag> Tags { get; set; }
 
-        public TagType()
-        {
-
-        }
-
-        public TagType(string name, TagTypeTypeEnum tagTypeType)
+        public TagType(string name, TagTypeTypeEnum tagTypeType, IEnumerable<Tag> tags)
         {
             Name = name;
-            TagTypeTypeId = (int) tagTypeType; 
+            TagTypeTypeId = (int) tagTypeType;
+            Tags = tags;
         }
     }
 }

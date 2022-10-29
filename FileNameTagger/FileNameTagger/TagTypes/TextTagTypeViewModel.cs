@@ -29,7 +29,7 @@ namespace FileNameTagger.TagTypes
 
         public TextTagTypeViewModel(TagType tagType)
         {
-            this.tag = new Tag(tagType.TagTypeId, "");
+            this.tag = new Tag(tagType.Name, "");
             this.TagType = tagType;
         }
 
