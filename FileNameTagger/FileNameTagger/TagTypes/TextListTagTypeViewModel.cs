@@ -56,12 +56,14 @@ namespace FileNameTagger.TagTypes
 
             var tag = new Tag(TagType.Name, tagName);
             Tags.Add(tag);
+            TagType.Tags = Tags;
         }
-
         public void UpdateTag(Tag tag)
         {
             if (tag == null)
                 return;
+
+            TagType.Tags = Tags;
         }
 
         public void DeleteTag(Tag tag)
@@ -69,6 +71,7 @@ namespace FileNameTagger.TagTypes
             if (tag == null)
                 return;
             Tags.Remove(tag);
+            TagType.Tags = Tags; 
         }
 
         public string ToString()
