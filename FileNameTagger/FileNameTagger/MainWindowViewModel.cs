@@ -67,23 +67,6 @@ namespace FileNameTagger
             set { SetProperty(ref exportedTag, value); }
         }
 
-        public string LoadedFileName
-        {
-            get
-            {
-                if (loadedFile != null)
-                {
-                    return loadedFile.Name;
-                }
-                else
-                {
-                    return "No File Selected";
-                }
-            }
-
-            set { SetProperty(ref loadedFileName, value); }
-        }
-
         public Domain.File LoadedFile
         {
             get
@@ -95,7 +78,6 @@ namespace FileNameTagger
             {
                 if (loadedFile != value)
                 {
-                    loadedFile = value;
                     SetProperty(ref loadedFile, value);
                 }
             }
@@ -117,7 +99,7 @@ namespace FileNameTagger
             #region Componenent and data initialisations
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            LoadedFile = new Domain.File("No File Selected");
+            LoadedFile = new Domain.File("Nada");
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
@@ -315,9 +297,8 @@ namespace FileNameTagger
         private void OnAddFile(string filename)
         {
             OnClearTag();
-            var fileToAdd = new Domain.File(filename);
             SetResolutionFromFileInfo(filename);
-            LoadedFile = fileToAdd;
+            LoadedFile = new Domain.File(filename);
         }
 
         private void OnImportTagTemplate()
