@@ -30,6 +30,7 @@ namespace FileNameTagger
 
         #region Commands
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
+        public ICommand DropFileCommand { get; private set; }
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand ImportTagTemplateCommand { get; private set; }
@@ -105,7 +106,8 @@ namespace FileNameTagger
         {
 
             #region Command Instantiations
-            AddFileCommand = new RelayCommand(OnAddFile);
+            AddFileCommand = new RelayCommand(OnAddFileFromFileExplorer);
+            DropFileCommand = new RelayCommand<string>(OnDropFile);
             ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
             ExportTagTemplateCommand = new RelayCommand(OnExportTagTemplate);
             SaveTagCommand = new RelayCommand(OnSaveTag);
@@ -299,10 +301,20 @@ namespace FileNameTagger
             }
         }
 
-        private void OnAddFile()
+        private void OnDropFile(string filename)
+        {
+            OnAddFile(filename);
+        }
+
+        private void OnAddFileFromFileExplorer()
+        {
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.Video);
+            OnAddFile(filename);
+        }
+
+        private void OnAddFile(string filename)
         {
             OnClearTag();
-            var filename = SelectFileFromFileExplorer(FileTypeEnum.Video);
             var fileToAdd = new Domain.File(filename);
             SetResolutionFromFileInfo(filename);
             LoadedFile = fileToAdd;

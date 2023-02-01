@@ -1,5 +1,6 @@
 ﻿using Domain;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FileNameTagger
 {
@@ -26,6 +26,19 @@ namespace FileNameTagger
             InitializeComponent();
         }
 
+        private void Grid_Drop(object sender, DragEventArgs e)
+        {
 
+            var data = e.Data.GetData("FileName");
+            if (data == null)
+                return; 
+
+            string[] files = (string[])data;
+            var filename = files[0];
+
+            var viewModel = (MainWindowViewModel)DataContext;
+            if (viewModel.DropFileCommand.CanExecute(null))
+                viewModel.DropFileCommand.Execute(filename);
+        }
     }
 }

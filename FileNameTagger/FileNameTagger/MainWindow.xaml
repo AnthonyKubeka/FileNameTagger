@@ -36,7 +36,8 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Border Background="RoyalBlue">
-          <Grid>
+          <Grid AllowDrop="True"
+                Drop="Grid_Drop">
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
                 <RowDefinition Height="50"/>
