@@ -36,7 +36,8 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Border Background="RoyalBlue">
-          <Grid>
+          <Grid AllowDrop="True"
+                Drop="Grid_Drop">
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
                 <RowDefinition Height="50"/>
@@ -51,7 +52,7 @@
                     <MenuItem Header="_Load File"
                           Command ="{Binding AddFileCommand}">
                     </MenuItem>
-                    <MenuItem Header="_New Tag"
+                    <MenuItem Header="_Clear Tag Values"
                           Command="{Binding ClearTagCommand}"/>
                     <MenuItem Header="_Export Tag"
                           Command="{Binding SaveTagCommand}"/>

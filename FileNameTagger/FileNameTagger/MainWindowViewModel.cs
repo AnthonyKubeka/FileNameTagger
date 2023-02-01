@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Win32;
+using System.Text;
 
 namespace FileNameTagger
 {
@@ -28,6 +30,7 @@ namespace FileNameTagger
 
         #region Commands
         public RelayCommand AddFileCommand { get; private set; }//private set as we only want this to be settable once, on construction
+        public ICommand DropFileCommand { get; private set; }
         public RelayCommand SaveTagCommand { get; private set; }
         public RelayCommand ClearTagCommand { get; private set; }
         public RelayCommand ImportTagTemplateCommand { get; private set; }
@@ -64,23 +67,6 @@ namespace FileNameTagger
             set { SetProperty(ref exportedTag, value); }
         }
 
-        public string LoadedFileName
-        {
-            get
-            {
-                if (loadedFile != null)
-                {
-                    return loadedFile.Name;
-                }
-                else
-                {
-                    return "No File Selected";
-                }
-            }
-
-            set { SetProperty(ref loadedFileName, value); }
-        }
-
         public Domain.File LoadedFile
         {
             get
@@ -92,7 +78,6 @@ namespace FileNameTagger
             {
                 if (loadedFile != value)
                 {
-                    loadedFile = value;
                     SetProperty(ref loadedFile, value);
                 }
             }
@@ -103,17 +88,18 @@ namespace FileNameTagger
         {
 
             #region Command Instantiations
-            AddFileCommand = new RelayCommand(OnAddFile);
+            AddFileCommand = new RelayCommand(OnAddFileFromFileExplorer);
+            DropFileCommand = new RelayCommand<string>(OnDropFile);
             ImportTagTemplateCommand = new RelayCommand(OnImportTagTemplate);
             ExportTagTemplateCommand = new RelayCommand(OnExportTagTemplate);
             SaveTagCommand = new RelayCommand(OnSaveTag);
-            ClearTagCommand = new RelayCommand(OnNewTag);
+            ClearTagCommand = new RelayCommand(OnClearTag);
             #endregion
 
             #region Componenent and data initialisations
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            LoadedFile = new Domain.File("No File Selected");
+            LoadedFile = new Domain.File("Nada");
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
@@ -243,25 +229,32 @@ namespace FileNameTagger
 
         public string SelectFileFromFileExplorer(FileTypeEnum fileType)
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.FileName = "";
+            var dialog = new Microsoft.Win32.OpenFileDialog() { DereferenceLinks = false, FileName = "" };
             switch (fileType)
             {
                 case FileTypeEnum.Video:
                     dialog.DefaultExt = ".mp4";
-                    dialog.Filter = "Video files (*.mp4)|*.mkv|All files (*.*)|*.*";
+                    dialog.Filter = "Video files(*.mp4)|*.mkv|All files (*.*)|*.*";
                     break;
                 case FileTypeEnum.JSON:
                     dialog.DefaultExt = ".json";
-                    dialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                    dialog.Filter = "JSON files(*.json)|*.json|All files (*.*)|*.*";
                     break;
             }
 
             bool? result = dialog.ShowDialog();
-
+            var videoFileExtensions = new List<string>() { ".mp4", ".mkv", ".avi", ".wmv", ".flv", ".mov", ".mpg", ".mpeg", ".m4v", ".webm" }; 
             if (result == true)
             {
                 string filename = dialog.FileName;
+                FileInfo file = new FileInfo(filename);
+                var fileExtension = file.Extension; 
+
+                if (!videoFileExtensions.Contains(fileExtension) && fileType == FileTypeEnum.Video)
+                {
+                    MessageBox.Show("Invalid file format, FileNameTagger only works with video files.");
+                    return String.Empty; 
+                }
 
                 return filename;
             }
@@ -272,13 +265,40 @@ namespace FileNameTagger
 
         }
 
-        private void OnAddFile()
+        public void SaveFileToFileExplorer(string tagTemplate)
         {
-            OnNewTag();
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "Json files(*.json)| *.json | Text files(*.txt) | *.txt";
+            saveFileDialog1.Title = "Export Tag Template";
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                System.IO.FileStream fs =
+                    (System.IO.FileStream)saveFileDialog1.OpenFile();
+
+                byte[] tagTemplateToWrite = new UTF8Encoding(true).GetBytes(tagTemplate);
+                fs.Write(tagTemplateToWrite, 0, tagTemplateToWrite.Length);
+                fs.Close();
+            }
+        }
+
+        private void OnDropFile(string filename)
+        {
+            OnAddFile(filename);
+        }
+
+        private void OnAddFileFromFileExplorer()
+        {
             var filename = SelectFileFromFileExplorer(FileTypeEnum.Video);
-            var fileToAdd = new Domain.File(filename);
+            OnAddFile(filename);
+        }
+
+        private void OnAddFile(string filename)
+        {
+            OnClearTag();
             SetResolutionFromFileInfo(filename);
-            LoadedFile = fileToAdd;
+            LoadedFile = new Domain.File(filename);
         }
 
         private void OnImportTagTemplate()
@@ -301,23 +321,24 @@ namespace FileNameTagger
 
         private void OnExportTagTemplate()
         {
-
-            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
-            if (!string.IsNullOrEmpty(filename))
+            var tagTemplateToExport = new TagTemplate();
+            var tagTemplateTagTypes = new List<TagTemplateTagType>();
+            foreach(var tagType in TagTypes)
             {
-                using (StreamReader streamReader = new StreamReader(filename))
-                {
-                    string tagTemplateJson = streamReader.ReadToEnd();
-                    TagTemplate = JsonConvert.DeserializeObject<TagTemplate>(tagTemplateJson);
-                    SetTagAndTagTypeFromTagTemplateFromDisk(TagTemplate);
-                }
-
-                LoadTagTypeViewModels();
+                var tagTemplateTagType = new TagTemplateTagType();
+                tagTemplateTagType.Name = tagType.Name;
+                tagTemplateTagType.TagTypeType = (TagTypeTypeEnum)tagType.TagTypeTypeId;
+                tagTemplateTagType.Values = tagType.Tags.Select(x => x.Value);
+                tagTemplateTagTypes.Add(tagTemplateTagType);
             }
+            tagTemplateToExport.TagTemplateTagTypes = tagTemplateTagTypes;
+            tagTemplateToExport.TemplateName = "New";
+            var tagTemplate = JsonConvert.SerializeObject(tagTemplateToExport, Formatting.Indented);
 
+            SaveFileToFileExplorer(tagTemplate);        
         }
 
-        private void OnNewTag()
+        private void OnClearTag()
         {
         }
     }
