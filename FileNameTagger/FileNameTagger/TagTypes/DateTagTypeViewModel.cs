@@ -76,7 +76,7 @@ namespace FileNameTagger.TagTypes
 
         public string ToString()
         {
-            return YearOnly ? Date.Year.ToString() : Date.ToShortDateString();
+            return YearOnly ? Date.Year.ToString() : Date.ToString("yyyy.MM.dd");
         }
 
         public int GetTagTypeTypeId()
