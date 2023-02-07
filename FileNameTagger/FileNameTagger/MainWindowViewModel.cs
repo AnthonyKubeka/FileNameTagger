@@ -99,7 +99,7 @@ namespace FileNameTagger
             #region Componenent and data initialisations
             TagTypeViewModels = new ObservableCollection<ITagTypeViewModel>();
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
-            LoadedFile = new Domain.File("Nada");
+            LoadedFile = new Domain.File("No File Selected");
             exportedTag = "No Tag Created For File";
             #endregion
             TagTypeViewModelFactory = new TagTypeViewModelFactory();
@@ -114,7 +114,8 @@ namespace FileNameTagger
 
             foreach (var tagTypeViewModel in orderedTagTypeViewModels)
             {
-                exportedTag += $"{tagTypeViewModel.ToString()}-";
+                if (tagTypeViewModel.ToString()!= "")
+                    exportedTag += $"{tagTypeViewModel.ToString()}-";
             }
             var exportedTagString = exportedTag.Remove(exportedTag.Length - 1, 1);
             ExportedTag = exportedTagString;
@@ -285,7 +286,19 @@ namespace FileNameTagger
 
         private void OnDropFile(string filename)
         {
-            OnAddFile(filename);
+            FileTypeEnum fileType = FileTypeEnum.Video; 
+            if (Path.GetExtension(filename) == ".json" || Path.GetExtension(filename) == ".JSO")
+                fileType = FileTypeEnum.JSON;
+
+            switch (fileType){
+                case FileTypeEnum.Video:
+                    OnAddFile(filename);
+                    break;
+                case FileTypeEnum.JSON:
+                    ImportTagTemplate(filename);
+                    break;
+            }
+                
         }
 
         private void OnAddFileFromFileExplorer()
@@ -301,10 +314,8 @@ namespace FileNameTagger
             LoadedFile = new Domain.File(filename);
         }
 
-        private void OnImportTagTemplate()
+        private void ImportTagTemplate(string filename)
         {
-
-            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
             if (!string.IsNullOrEmpty(filename))
             {
                 using (StreamReader streamReader = new StreamReader(filename))
@@ -316,7 +327,13 @@ namespace FileNameTagger
 
                 LoadTagTypeViewModels();
             }
+        }
 
+        private void OnImportTagTemplate()
+        {
+
+            var filename = SelectFileFromFileExplorer(FileTypeEnum.JSON);
+            ImportTagTemplate(filename);
         }
 
         private void OnExportTagTemplate()
