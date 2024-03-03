@@ -70,8 +70,21 @@ namespace FileNameTagger.TagTypes
             DatePickerVisibility = Visibility.Visible;
             YearComboBoxVisibility = Visibility.Hidden;
             TagType = tagType;
-            DateTag = new Tag(tagType.Name, DateTime.Now.ToString());
+            DateTag = new Tag(tagType.Name, ConvertDateStringToDate(tagType.Tags.First().Value));
             Date = Convert.ToDateTime(DateTag.Value);
+        }
+
+        private string ConvertDateStringToDate(string value)
+        {
+            try
+            {
+                var dateTime = DateTime.Parse(value);
+                return dateTime.ToString();
+            }
+            catch (Exception e)
+            {
+                return DateTime.Now.ToString(); 
+            }
         }
 
         public string ToString()

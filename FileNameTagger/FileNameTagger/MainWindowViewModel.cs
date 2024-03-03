@@ -309,6 +309,11 @@ namespace FileNameTagger
 
         private void OnAddFile(string filename)
         {
+            if (string.IsNullOrEmpty(filename))
+            {
+                return; 
+            }
+
             OnClearTag();
             SetResolutionFromFileInfo(filename);
             LoadedFile = new Domain.File(filename);

@@ -12,7 +12,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{Binding Path=TagType.Name}" Grid.Column="0"/>
-        <TextBox Text="{Binding Tag.Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column ="1" Margin="5" Padding="5"/>
+        <TextBlock Text="{Binding Path=TagType.Name}" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox Text="{Binding Tag.Value, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" VerticalAlignment="Center" Margin="5, 0, 0, 0" Padding="5, 0, 0, 0"/>
     </Grid>
 </ContentControl>

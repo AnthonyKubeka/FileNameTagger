@@ -11,9 +11,11 @@
         mc:Ignorable="d"
         Height="600" Width="1080" 
         ResizeMode="CanResizeWithGrip"
-        Background="Transparent"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Title="FileNameTagger"
         ShowInTaskbar="True"
-        WindowStartupLocation="CenterOwner"
+        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+        WindowStartupLocation="CenterScreen"
         WindowState="Normal"
         SizeToContent="Manual"
         >
@@ -39,15 +41,15 @@
           <Grid AllowDrop="True"
                 Drop="Grid_Drop">
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Menu Grid.Row="0" Grid.Column="0">
+            <Menu Grid.Row="0" Background="{DynamicResource PrimaryHueMidBrush}" Foreground="Black">
                 <MenuItem Header="_File" Style="{StaticResource MenuButtonTheme}" >
                     <MenuItem Header="_Load File"
                           Command ="{Binding AddFileCommand}">
@@ -66,19 +68,19 @@
                     </MenuItem>
                 </MenuItem>
             </Menu>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                            <TextBlock FontSize="18" Margin="0,0,5,5">Selected File:</TextBlock>
-                            <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}"/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="10">
+                <TextBlock FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}">Selected File:</TextBlock>
+                <TextBlock FontSize="18" Text="{Binding LoadedFile.Name}" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
             </StackPanel>
-                <ListView Grid.Row ="2" x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}"/>
-                <Grid Grid.Row="3" x:Name="ExportedTag">
+                <ListView Grid.Row ="2" x:Name="TagTypesListBox" ItemsSource="{Binding TagTypeViewModels}" Margin="10"/>
+                <Grid Grid.Row="3" x:Name="ExportedTag" Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0">Exported Tag:</TextBlock>
-                    <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"></TextBox>
-                </Grid>
+                <TextBlock Grid.Column="0" Text="Exported Tag: " VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
+                <TextBox IsReadOnly="True" Grid.Column="1" Text="{Binding ExportedTag}" Margin="5"/>
+            </Grid>
             </Grid>
     </Border>
 </Window>

@@ -1,0 +1,30 @@
+{
+    "TemplateName": "Movies",
+    "TagTemplateTagTypes": [
+      {
+        "Name": "Title",
+        "TagTypeType": "Text",
+        "Values": ["Example Movie Title"]
+      },
+      {
+        "Name": "Studio",
+        "TagTypeType": "TextList",
+        "Values": ["Warner Bros", "Paramount", "Universal Pictures", "20th Century Fox", "Sony Pictures"]
+      },
+      {
+        "Name": "Genre",
+        "TagTypeType": "Enum",
+        "Values": ["Action", "Comedy", "Drama", "Fantasy", "Horror", "Romance"]
+      },
+      {
+        "Name": "Rating",
+        "TagTypeType": "Text",
+        "Values": [1]
+      },
+      {
+        "Name": "ReleaseDate",
+        "TagTypeType": "Date",
+        "Values": ["2023-01-01"]
+      }
+    ]
+  }
